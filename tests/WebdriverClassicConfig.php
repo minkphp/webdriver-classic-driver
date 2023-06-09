@@ -1,10 +1,10 @@
 <?php
 
-namespace Mink\Tests\Driver;
+namespace Mink\WebdriverClassDriver\Tests;
 
 use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Tests\Driver\AbstractConfig;
-use Mink\Driver\WebdriverClassicDriver;
+use Mink\WebdriverClassDriver\WebdriverClassicDriver;
 
 class WebdriverClassicConfig extends AbstractConfig
 {

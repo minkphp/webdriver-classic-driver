@@ -17,7 +17,7 @@
     </testsuites>
 
     <php>
-        <var name="driver_config_factory" value="Mink\Tests\Driver\WebdriverClassicConfig::getInstance"/>
+        <var name="driver_config_factory" value="Mink\WebdriverClassDriver\Tests\WebdriverClassicConfig::getInstance"/>
         <!--server name="WEB_FIXTURES_HOST" value="http://test.mink.dev" /-->
         <!-- MacOS -->
         <!--<server name="WEB_FIXTURES_HOST" value="http://docker.for.mac.localhost:8002"/>-->

@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Mink\Driver;
+namespace Mink\WebdriverClassDriver;
 
 use Behat\Mink\Driver\CoreDriver;
 
