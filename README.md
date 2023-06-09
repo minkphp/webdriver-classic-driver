@@ -1,10 +1,10 @@
 # Mink WebDriver Classic Driver
 
-[![Latest Stable Version](https://poser.pugx.org/mink/webdriver-classic-driver/v/stable.svg)](https://packagist.org/packages/mink/webdriver-classic-driver)
-[![Latest Unstable Version](https://poser.pugx.org/mink/webdriver-classic-driver/v/unstable.svg)](https://packagist.org/packages/mink/webdriver-classic-driver)
-[![Total Downloads](https://poser.pugx.org/mink/webdriver-classic-driver/downloads.svg)](https://packagist.org/packages/mink/webdriver-classic-driver)
+[![Latest Stable Version](https://poser.pugx.org/mink/webdriver-classic-driver/v)](https://packagist.org/packages/mink/webdriver-classic-driver)
+[![Latest Unstable Version](https://poser.pugx.org/mink/webdriver-classic-driver/v/unstable)](https://packagist.org/packages/mink/webdriver-classic-driver)
+[![Total Downloads](https://poser.pugx.org/mink/webdriver-classic-driver/downloads)](https://packagist.org/packages/mink/webdriver-classic-driver)
 [![CI](https://github.com/minkphp/webdriver-classic-driver/actions/workflows/ci.yml/badge.svg)](https://github.com/minkphp/webdriver-classic-driver/actions/workflows/ci.yml)
-[![License](https://poser.pugx.org/mink/webdriver-classic-driver/license.svg)](https://packagist.org/packages/mink/webdriver-classic-driver)
+[![License](https://poser.pugx.org/mink/webdriver-classic-driver/license)](https://packagist.org/packages/mink/webdriver-classic-driver)
 [![codecov](https://codecov.io/gh/minkphp/webdriver-classic-driver/branch/main/graph/badge.svg?token=11hgqXqod9)](https://codecov.io/gh/minkphp/webdriver-classic-driver)
 
 ## Installation
