@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         colors="true"
+         bootstrap="vendor/autoload.php"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd">
+    <coverage>
+        <include>
+            <directory>./src</directory>
+        </include>
+    </coverage>
+
+    <testsuites>
+        <testsuite name="Driver test suite">
+            <directory>tests</directory>
+            <directory>vendor/mink/driver-testsuite/tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <var name="driver_config_factory" value="Mink\Tests\Driver\WebdriverClassicConfig::getInstance"/>
+        <!--server name="WEB_FIXTURES_HOST" value="http://test.mink.dev" /-->
+        <!-- MacOS -->
+        <!--<server name="WEB_FIXTURES_HOST" value="http://docker.for.mac.localhost:8002"/>-->
+        <!--<server name="WEB_FIXTURES_BROWSER" value="firefox"/>-->
+        <!-- where driver will connect to -->
+        <server name="DRIVER_URL" value="http://localhost:4444/wd/hub"/>
+        <!-- where DocumentRoot of 'Test Machine' is mounted to on 'Driver Machine' (only if these are 2 different machines) -->
+        <!--server name="DRIVER_MACHINE_BASE_PATH" value="" /-->
+        <!--server name="TEST_MACHINE_BASE_PATH" value="" /-->
+    </php>
+
+    <listeners>
+        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener"/>
+    </listeners>
+</phpunit>

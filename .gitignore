@@ -1,0 +1,5 @@
+logs
+vendor
+composer.lock
+phpunit.xml
+*.cache
