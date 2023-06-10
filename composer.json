@@ -14,7 +14,9 @@
     ],
     "require": {
         "php": ">=7.4",
-        "behat/mink": "^1.9@dev"
+        "ext-json": "*",
+        "behat/mink": "^1.9@dev",
+        "php-webdriver/webdriver": "^1.14"
     },
     "require-dev": {
         "mink/driver-testsuite": "dev-master",
@@ -30,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Mink\\WebdriverClassDriver\\Tests\\": "tests"
+            "Mink\\WebdriverClassDriver\\Tests\\": "tests/"
         }
     },
     "extra": {

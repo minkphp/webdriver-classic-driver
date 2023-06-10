@@ -37,39 +37,61 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    # We cannot trigger events in old chrome, so we allow the run to fail
+    continue-on-error: ${{ matrix.browser == 'chrome' && matrix.selenium == '2.53.1' }}
     strategy:
       matrix:
         php: [ '7.4', '8.0', '8.1', '8.2' ]
+        browser: [ 'firefox', 'chrome' ]
+        selenium: [ '2.53.1', '3', '4' ]
       fail-fast: false
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Start Selenium
+        run: |
+          mkdir -p ./logs
+          SELENIUM_IMAGE=selenium/standalone-${{ matrix.browser }}:${{ matrix.selenium }} docker compose up --no-color &> ./logs/selenium.log &
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           coverage: "xdebug"
           php-version: "${{ matrix.php }}"
+          tools: composer
           ini-file: development
+          ini-values: date.timezone=Europe/Berlin, error_reporting=-1, display_errors=On
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: |
           composer update --no-interaction --prefer-dist --ansi --no-progress
 
-      - name: Run tests
+      - name: Wait for selenium to start
         run: |
-          vendor/bin/phpunit -v --coverage-clover=coverage.xml
+          curl --head -X GET --silent --show-error --retry 60 --retry-connrefused --retry-delay 1 http://172.18.0.2:4444
+
+      - name: Run tests
+        env:
+          WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
+          DRIVER_URL: http://172.18.0.2:4444/wd/hub
+          WEB_FIXTURES_HOST: http://host.docker.internal:8002
+          DRIVER_MACHINE_BASE_PATH: /fixtures/
+        run: |
+          vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
+        if: ${{ !env.ACT }}
         with:
           files: coverage.xml
 
       - name: Archive logs artifacts
-        if: ${{ failure() }}
         uses: actions/upload-artifact@v3
+        if: always()
         with:
-          name: logs_php-${{ matrix.php }}
-          path: |
-            logs
+          name: logs_php-${{ matrix.php }}_selenium-${{ matrix.selenium }}_${{ matrix.browser }}
+          path: logs
