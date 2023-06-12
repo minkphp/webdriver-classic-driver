@@ -60,9 +60,7 @@ jobs:
         with:
           coverage: "xdebug"
           php-version: "${{ matrix.php }}"
-          tools: composer
           ini-file: development
-          ini-values: date.timezone=Europe/Berlin, error_reporting=-1, display_errors=On
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
