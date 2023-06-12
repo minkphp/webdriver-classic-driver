@@ -1078,7 +1078,6 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * @param string $xpath the xpath to search with
      * @param string $script the script to execute
-     * @param bool $sync whether to run the script synchronously (default is TRUE)
      *
      * @return mixed
      * @throws NoSuchElementException
@@ -1088,10 +1087,9 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath,
         #[Language('JavaScript')]
-        string $script,
-        bool   $sync = true
+        string $script
     ) {
-        return $this->executeJsOnElement($this->findElement($xpath), $script, $sync);
+        return $this->executeJsOnElement($this->findElement($xpath), $script);
     }
 
     /**
@@ -1099,20 +1097,15 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * @param RemoteWebElement $element the webdriver element
      * @param string $script the script to execute
-     * @param Boolean $sync whether to run the script synchronously (default is TRUE)
      * @return mixed
      * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnElement(
         RemoteWebElement $element,
         #[Language('JavaScript')]
-        string           $script,
-        bool             $sync = true
+        string           $script
     ) {
-        if ($sync) {
-            return $this->webDriver->executeScript($script, [$element]);
-        }
-        return $this->webDriver->executeAsyncScript($script, [$element]);
+        return $this->webDriver->executeScript($script, [$element]);
     }
 
     /**
@@ -1183,10 +1176,9 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @return mixed
      * @throws DriverException
      */
-    private function withWindow(?string $name, callable $callback)
+    private function withWindow(?string $name, callable $callback): void
     {
         $origName = $this->getWindowName();
 
@@ -1195,7 +1187,7 @@ class WebdriverClassicDriver extends CoreDriver
                 $this->switchToWindow($name);
             }
 
-            return $callback();
+            $callback();
         } finally {
             if ($origName !== $name) {
                 $this->switchToWindow($origName);
