@@ -2,6 +2,7 @@
 
 namespace Mink\WebdriverClassDriver\Tests;
 
+use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Tests\Driver\AbstractConfig;
 use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
@@ -17,7 +18,7 @@ class WebdriverClassicConfig extends AbstractConfig
     /**
      * {@inheritdoc}
      */
-    public function createDriver()
+    public function createDriver(): DriverInterface
     {
         $browser = getenv('WEB_FIXTURES_BROWSER') ?: null;
         $seleniumHost = $_SERVER['DRIVER_URL'];
