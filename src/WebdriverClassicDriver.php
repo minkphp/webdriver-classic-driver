@@ -332,7 +332,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function getTagName(
         #[Language('XPath')]
@@ -343,7 +343,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function getText(
         #[Language('XPath')]
@@ -354,7 +354,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function getHtml(
         #[Language('XPath')]
@@ -365,7 +365,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function getOuterHtml(
         #[Language('XPath')]
@@ -376,15 +376,14 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws JsonException
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function getAttribute(
         #[Language('XPath')]
         $xpath,
         $name
     ): ?string {
-        $escapedName = json_encode((string)$name, JSON_THROW_ON_ERROR);
+        $escapedName = $this->jsonEncode($name, 'get attribute', 'attribute name');
         $script = "return arguments[0].getAttribute($escapedName)";
 
         return $this->executeJsOnXpath($xpath, $script);
@@ -392,7 +391,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function getValue(
         #[Language('XPath')]
@@ -465,8 +464,6 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      * @throws DriverException
-     * @throws NoSuchElementException
-     * @throws JsonException
      */
     public function setValue(
         #[Language('XPath')]
@@ -507,7 +504,7 @@ class WebdriverClassicDriver extends CoreDriver
                         // one cannot simply type into a color field, nor clear it
                         $this->executeJsOnElement(
                             $element,
-                            'arguments[0].value = ' . json_encode($value, JSON_THROW_ON_ERROR)
+                            'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
                         );
                         break;
 
@@ -520,7 +517,7 @@ class WebdriverClassicDriver extends CoreDriver
                             // fix for Selenium 2 compatibility, since it's not able to clear these specific fields
                             $this->executeJsOnElement(
                                 $element,
-                                'arguments[0].value = ' . json_encode($value, JSON_THROW_ON_ERROR)
+                                'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
                             );
                         }
                         break;
@@ -553,7 +550,6 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      * @throws DriverException
-     * @throws NoSuchElementException
      */
     public function check(
         #[Language('XPath')]
@@ -572,7 +568,6 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      * @throws DriverException
-     * @throws NoSuchElementException
      */
     public function uncheck(
         #[Language('XPath')]
@@ -590,7 +585,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function isChecked(
         #[Language('XPath')]
@@ -602,7 +597,6 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      * @throws DriverException
-     * @throws NoSuchElementException
      */
     public function selectOption(
         #[Language('XPath')]
@@ -631,7 +625,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function isSelected(
         #[Language('XPath')]
@@ -642,7 +636,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function click(
         #[Language('XPath')]
@@ -651,15 +645,9 @@ class WebdriverClassicDriver extends CoreDriver
         $this->clickOnElement($this->findElement($xpath));
     }
 
-    private function clickOnElement(RemoteWebElement $element): void
-    {
-        $element->getLocationOnScreenOnceScrolledIntoView();
-        $element->click();
-    }
-
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function doubleClick(
         #[Language('XPath')]
@@ -668,15 +656,9 @@ class WebdriverClassicDriver extends CoreDriver
         $this->doubleClickOnElement($this->findElement($xpath));
     }
 
-    private function doubleClickOnElement(RemoteWebElement $element): void
-    {
-        $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->webDriver->getMouse()->doubleClick($element->getCoordinates());
-    }
-
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function rightClick(
         #[Language('XPath')]
@@ -688,7 +670,6 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      * @throws DriverException
-     * @throws NoSuchElementException
      */
     public function attachFile(
         #[Language('XPath')]
@@ -705,7 +686,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function isVisible(
         #[Language('XPath')]
@@ -716,7 +697,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function mouseOver(
         #[Language('XPath')]
@@ -727,7 +708,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function focus(
         #[Language('XPath')]
@@ -738,7 +719,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function blur(
         #[Language('XPath')]
@@ -749,8 +730,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws JsonException
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function keyPress(
         #[Language('XPath')]
@@ -764,8 +744,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws JsonException
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function keyDown(
         #[Language('XPath')]
@@ -779,8 +758,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws JsonException
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function keyUp(
         #[Language('XPath')]
@@ -794,7 +772,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function dragTo(
         #[Language('XPath')]
@@ -873,7 +851,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     public function submitForm(
         #[Language('XPath')]
@@ -966,7 +944,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Drag and drop an element by x,y pixels.
      *
-     * @throws NoSuchElementException
+     * @throws DriverException
      * @api
      */
     public function dragBy(
@@ -1047,7 +1025,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * @param int|string $char
-     * @throws JsonException
+     * @throws DriverException
      */
     private function charToSynOptions($char, ?string $modifier = null): string
     {
@@ -1069,7 +1047,7 @@ class WebdriverClassicDriver extends CoreDriver
             $options[$modifier . 'Key'] = true;
         }
 
-        return json_encode($options, JSON_THROW_ON_ERROR);
+        return $this->jsonEncode($options, 'build Syn payload', 'options');
     }
 
     /**
@@ -1080,7 +1058,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @param string $script the script to execute
      *
      * @return mixed
-     * @throws NoSuchElementException
+     * @throws DriverException
      * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnXpath(
@@ -1163,6 +1141,18 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
+    private function clickOnElement(RemoteWebElement $element): void
+    {
+        $element->getLocationOnScreenOnceScrolledIntoView();
+        $element->click();
+    }
+
+    private function doubleClickOnElement(RemoteWebElement $element): void
+    {
+        $element->getLocationOnScreenOnceScrolledIntoView();
+        $this->webDriver->getMouse()->doubleClick($element->getCoordinates());
+    }
+
     private function rightClickOnElement(RemoteWebElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
@@ -1196,17 +1186,21 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     private function findElement(
         #[Language('XPath')]
         string           $xpath,
         RemoteWebElement $parent = null
     ): RemoteWebElement {
-        $finder = WebDriverBy::xpath($xpath);
-        return $parent
-            ? $parent->findElement($finder)
-            : $this->webDriver->findElement($finder);
+        try {
+            $finder = WebDriverBy::xpath($xpath);
+            return $parent
+                ? $parent->findElement($finder)
+                : $this->webDriver->findElement($finder);
+        } catch (Throwable $e) {
+            throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
+        }
     }
 
     /**
@@ -1247,9 +1241,8 @@ class WebdriverClassicDriver extends CoreDriver
                     $element
                 );
             }
-        } catch (NoSuchElementException $e) {
+        } catch (DriverException $e) {
             $message = sprintf('The radio group "%s" does not have an option "%s"', $name, $value);
-
             throw new DriverException($message, 0, $e);
         }
 
@@ -1257,7 +1250,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     private function selectOptionOnElement(RemoteWebElement $element, string $value, bool $multiple = false): void
     {
@@ -1321,7 +1314,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @throws NoSuchElementException
+     * @throws DriverException
      */
     private function trigger(
         #[Language('XPath')]
@@ -1331,6 +1324,19 @@ class WebdriverClassicDriver extends CoreDriver
         string $options = '{}'
     ): void {
         $this->withSyn()->executeJsOnXpath($xpath, "window.syn.trigger(arguments[0], '$event', $options)");
+    }
+
+    /**
+     * @param mixed $value
+     * @throws DriverException
+     */
+    private function jsonEncode($value, string $action, string $field): string
+    {
+        try {
+            return json_encode($value, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new DriverException("Cannot $action, $field not serializable: {$e->getMessage()}", 0, $e);
+        }
     }
 
     // </editor-fold>
