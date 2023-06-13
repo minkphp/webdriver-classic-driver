@@ -4,7 +4,8 @@ namespace Mink\WebdriverClassDriver\Tests;
 
 use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Tests\Driver\AbstractConfig;
-use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
+use Behat\Mink\Tests\Driver\Basic\HeaderTest;
+use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
 use Mink\WebdriverClassDriver\WebdriverClassicDriver;
 
@@ -39,13 +40,23 @@ class WebdriverClassicConfig extends AbstractConfig
 
     public function skipMessage($testCase, $test): ?string
     {
-        if ($testCase === BasicAuthTest::class && $test === 'testBasicAuthInUrl') {
-            return 'This driver has mixed support for basic auth modals, depending on browser type and selenium version.';
+        if (
+            $testCase === WindowTest::class
+            && $test === 'testWindowMaximize'
+            && getenv('GITHUB_ACTIONS') === 'true'
+        ) {
+            return 'Maximizing the window does not work when running the browser in Xvfb.';
         }
 
-        if ($testCase === WindowTest::class && $test === 'testWindowMaximize') {
-            return 'There is no sane way to find if a window is indeed maximized; this test is quite broken.';
+        if ($testCase === HeaderTest::class) {
+            return 'Headers are not supported.';
         }
+
+        if ($testCase === StatusCodeTest::class) {
+            return 'Checking status code is not supported.';
+        }
+
+        // TODO skip event tests for old chrome
 
         return parent::skipMessage($testCase, $test);
     }
