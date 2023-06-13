@@ -134,7 +134,7 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         try {
-            $this->webDriver->quit();
+            $this->getWebDriver()->quit();
             $this->webDriver = null;
         } catch (Throwable $e) {
             throw new DriverException('Could not close connection', 0, $e);
@@ -143,50 +143,56 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function reset(): void
     {
-        $this->webDriver->manage()->deleteAllCookies();
+        $this->getWebDriver()->manage()->deleteAllCookies();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function visit($url): void
     {
-        $this->webDriver->navigate()->to($url);
+        $this->getWebDriver()->navigate()->to($url);
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function getCurrentUrl(): string
     {
-        return $this->webDriver->getCurrentURL();
+        return $this->getWebDriver()->getCurrentURL();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function reload(): void
     {
-        $this->webDriver->navigate()->refresh();
+        $this->getWebDriver()->navigate()->refresh();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function forward(): void
     {
-        $this->webDriver->navigate()->forward();
+        $this->getWebDriver()->navigate()->forward();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function back(): void
     {
-        $this->webDriver->navigate()->back();
+        $this->getWebDriver()->navigate()->back();
     }
 
     /**
@@ -203,33 +209,35 @@ class WebdriverClassicDriver extends CoreDriver
             $name = $this->getWindowHandleFromName($name);
         }
 
-        $this->webDriver->switchTo()->window($name);
+        $this->getWebDriver()->switchTo()->window($name);
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function switchToIFrame($name = null): void
     {
         $frameQuery = $name;
-        if ($name && is_string($name) && $this->webDriver->isW3cCompliant()) {
+        if ($name && is_string($name) && $this->getWebDriver()->isW3cCompliant()) {
             try {
-                $frameQuery = $this->webDriver->findElement(WebDriverBy::id($name));
+                $frameQuery = $this->getWebDriver()->findElement(WebDriverBy::id($name));
             } catch (NoSuchElementException $e) {
-                $frameQuery = $this->webDriver->findElement(WebDriverBy::name($name));
+                $frameQuery = $this->getWebDriver()->findElement(WebDriverBy::name($name));
             }
         }
 
-        $this->webDriver->switchTo()->frame($frameQuery);
+        $this->getWebDriver()->switchTo()->frame($frameQuery);
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function setCookie($name, $value = null): void
     {
         if (null === $value) {
-            $this->webDriver->manage()->deleteCookieNamed($name);
+            $this->getWebDriver()->manage()->deleteCookieNamed($name);
 
             return;
         }
@@ -240,16 +248,17 @@ class WebdriverClassicDriver extends CoreDriver
             'secure' => false,
         ];
 
-        $this->webDriver->manage()->addCookie($cookieArray);
+        $this->getWebDriver()->manage()->addCookie($cookieArray);
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function getCookie($name): ?string
     {
         try {
-            $result = $this->webDriver->manage()->getCookieNamed($name);
+            $result = $this->getWebDriver()->manage()->getCookieNamed($name);
         } catch (NoSuchCookieException $e) {
             $result = null;
         }
@@ -267,48 +276,52 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function getContent(): string
     {
-        return $this->webDriver->getPageSource();
+        return $this->getWebDriver()->getPageSource();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function getScreenshot(): string
     {
-        return $this->webDriver->takeScreenshot();
+        return $this->getWebDriver()->takeScreenshot();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function getWindowNames(): array
     {
-        $origWindow = $this->webDriver->getWindowHandle();
+        $origWindow = $this->getWebDriver()->getWindowHandle();
 
         try {
             $result = [];
-            foreach ($this->webDriver->getWindowHandles() as $tempWindow) {
-                $this->webDriver->switchTo()->window($tempWindow);
+            foreach ($this->getWebDriver()->getWindowHandles() as $tempWindow) {
+                $this->getWebDriver()->switchTo()->window($tempWindow);
                 $result[] = $this->getWindowName();
             }
             return $result;
         } finally {
-            $this->webDriver->switchTo()->window($origWindow);
+            $this->getWebDriver()->switchTo()->window($origWindow);
         }
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function getWindowName(): string
     {
         $name = (string)$this->evaluateScript('window.name');
 
         if ($name === '') {
-            $name = self::W3C_WINDOW_HANDLE_PREFIX . $this->webDriver->getWindowHandle();
+            $name = self::W3C_WINDOW_HANDLE_PREFIX . $this->getWebDriver()->getWindowHandle();
         }
 
         return $name;
@@ -316,12 +329,13 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function findElementXpaths(
         #[Language('XPath')]
         $xpath
     ): array {
-        $nodes = $this->webDriver->findElements(WebDriverBy::xpath($xpath));
+        $nodes = $this->getWebDriver()->findElements(WebDriverBy::xpath($xpath));
 
         $elements = [];
         foreach ($nodes as $i => $node) {
@@ -783,11 +797,12 @@ class WebdriverClassicDriver extends CoreDriver
     ): void {
         $source = $this->findElement($sourceXpath);
         $destination = $this->findElement($destinationXpath);
-        $this->webDriver->action()->dragAndDrop($source, $destination)->perform();
+        $this->getWebDriver()->action()->dragAndDrop($source, $destination)->perform();
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function executeScript(
         #[Language('JavaScript')]
@@ -798,11 +813,12 @@ class WebdriverClassicDriver extends CoreDriver
             $script = '(' . $script . ')';
         }
 
-        $this->webDriver->executeScript($script);
+        $this->getWebDriver()->executeScript($script);
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function evaluateScript(
         #[Language('JavaScript')]
@@ -812,11 +828,12 @@ class WebdriverClassicDriver extends CoreDriver
             $script = "return $script;";
         }
 
-        return $this->webDriver->executeScript($script);
+        return $this->getWebDriver()->executeScript($script);
     }
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function wait(
         $timeout,
@@ -882,11 +899,27 @@ class WebdriverClassicDriver extends CoreDriver
     // <editor-fold desc="Extra Public API">
 
     /**
+     * Returns the browser name.
+     *
      * @api
      */
     public function getBrowserName(): string
     {
         return $this->browserName;
+    }
+
+    /**
+     * Returns Session ID of WebDriver or `null`, when session not started yet.
+     *
+     * @api
+     * @return string|null
+     * @throws DriverException
+     */
+    public function getWebDriverSessionId(): ?string
+    {
+        return $this->isStarted()
+            ? $this->getWebDriver()->getSessionID()
+            : null;
     }
 
     /**
@@ -929,10 +962,11 @@ class WebdriverClassicDriver extends CoreDriver
      * Globally press a key i.e. not typing into an element.
      *
      * @api
+     * @throws DriverException
      */
     public function globalKeyPress($char, $modifier = null): void
     {
-        $keyboard = $this->webDriver->getKeyboard();
+        $keyboard = $this->getWebDriver()->getKeyboard();
         if ($modifier) {
             $keyboard->pressKey($modifier);
         }
@@ -945,8 +979,8 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Drag and drop an element by x,y pixels.
      *
-     * @throws DriverException
      * @api
+     * @throws DriverException
      */
     public function dragBy(
         #[Language('XPath')]
@@ -955,25 +989,24 @@ class WebdriverClassicDriver extends CoreDriver
         int $yOffset
     ): void {
         $source = $this->findElement($sourceXpath);
-        $this->webDriver->action()->dragAndDropBy($source, $xOffset, $yOffset)->perform();
-    }
-
-    /**
-     * Returns Session ID of WebDriver or `null`, when session not started yet.
-     *
-     * @return string|null
-     * @api
-     */
-    public function getWebDriverSessionId(): ?string
-    {
-        return $this->isStarted()
-            ? $this->webDriver->getSessionID()
-            : null;
+        $this->getWebDriver()->action()->dragAndDropBy($source, $xOffset, $yOffset)->perform();
     }
 
     // </editor-fold>
 
     // <editor-fold desc="Private Utilities">
+
+    /**
+     * @throws DriverException
+     */
+    private function getWebDriver(): RemoteWebDriver
+    {
+        if (!$this->isStarted()) {
+            throw new DriverException('Driver has not been started');
+        }
+
+        return $this->webDriver;
+    }
 
     /**
      * Detect and assign appropriate browser capabilities
@@ -1010,6 +1043,9 @@ class WebdriverClassicDriver extends CoreDriver
         return $caps;
     }
 
+    /**
+     * @throws DriverException
+     */
     private function withSyn(): self
     {
         $hasSyn = $this->evaluateScript(
@@ -1018,7 +1054,7 @@ class WebdriverClassicDriver extends CoreDriver
 
         if (!$hasSyn) {
             $synJs = file_get_contents(__DIR__ . '/../resources/syn.js');
-            $this->webDriver->executeScript($synJs);
+            $this->getWebDriver()->executeScript($synJs);
         }
 
         return $this;
@@ -1077,6 +1113,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @param RemoteWebElement $element the webdriver element
      * @param string $script the script to execute
      * @return mixed
+     * @throws DriverException
      * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnElement(
@@ -1084,7 +1121,7 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('JavaScript')]
         string           $script
     ) {
-        return $this->webDriver->executeScript($script, [$element]);
+        return $this->getWebDriver()->executeScript($script, [$element]);
     }
 
     /**
@@ -1093,7 +1130,7 @@ class WebdriverClassicDriver extends CoreDriver
     private function applyTimeouts(): void
     {
         try {
-            $timeouts = $this->webDriver->manage()->timeouts();
+            $timeouts = $this->getWebDriver()->manage()->timeouts();
             foreach ($this->timeouts as $type => $param) {
                 switch ($type) {
                     case 'script':
@@ -1126,11 +1163,11 @@ class WebdriverClassicDriver extends CoreDriver
 
         // ..otherwise check if any existing window has the specified name
 
-        $origWindowHandle = $this->webDriver->getWindowHandle();
+        $origWindowHandle = $this->getWebDriver()->getWindowHandle();
 
         try {
-            foreach ($this->webDriver->getWindowHandles() as $handle) {
-                $this->webDriver->switchTo()->window($handle);
+            foreach ($this->getWebDriver()->getWindowHandles() as $handle) {
+                $this->getWebDriver()->switchTo()->window($handle);
                 if ($this->evaluateScript('window.name') === $name) {
                     return $handle;
                 }
@@ -1138,7 +1175,7 @@ class WebdriverClassicDriver extends CoreDriver
 
             throw new DriverException("Could not find handle of window named \"$name\"");
         } finally {
-            $this->webDriver->switchTo()->window($origWindowHandle);
+            $this->getWebDriver()->switchTo()->window($origWindowHandle);
         }
     }
 
@@ -1148,22 +1185,31 @@ class WebdriverClassicDriver extends CoreDriver
         $element->click();
     }
 
+    /**
+     * @throws DriverException
+     */
     private function doubleClickOnElement(RemoteWebElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->webDriver->getMouse()->doubleClick($element->getCoordinates());
+        $this->getWebDriver()->getMouse()->doubleClick($element->getCoordinates());
     }
 
+    /**
+     * @throws DriverException
+     */
     private function rightClickOnElement(RemoteWebElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->webDriver->getMouse()->contextClick($element->getCoordinates());
+        $this->getWebDriver()->getMouse()->contextClick($element->getCoordinates());
     }
 
+    /**
+     * @throws DriverException
+     */
     private function mouseOverElement(RemoteWebElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->webDriver->getMouse()->mouseMove($element->getCoordinates());
+        $this->getWebDriver()->getMouse()->mouseMove($element->getCoordinates());
     }
 
     /**
@@ -1198,7 +1244,7 @@ class WebdriverClassicDriver extends CoreDriver
             $finder = WebDriverBy::xpath($xpath);
             return $parent
                 ? $parent->findElement($finder)
-                : $this->webDriver->findElement($finder);
+                : $this->getWebDriver()->findElement($finder);
         } catch (Throwable $e) {
             throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
         }
@@ -1282,7 +1328,7 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * Note: this implementation does not trigger a change event after deselecting the elements.
      *
-     * @param RemoteWebElement $element
+     * @throws DriverException
      */
     private function deselectAllOptions(RemoteWebElement $element): void
     {
