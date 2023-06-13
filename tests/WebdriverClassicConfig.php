@@ -3,9 +3,12 @@
 namespace Mink\WebdriverClassDriver\Tests;
 
 use Behat\Mink\Driver\DriverInterface;
+use Behat\Mink\Exception\DriverException;
 use Behat\Mink\Tests\Driver\AbstractConfig;
+use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
 use Behat\Mink\Tests\Driver\Basic\HeaderTest;
 use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
+use Behat\Mink\Tests\Driver\Js\EventsTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
 use Mink\WebdriverClassDriver\WebdriverClassicDriver;
 
@@ -18,6 +21,7 @@ class WebdriverClassicConfig extends AbstractConfig
 
     /**
      * {@inheritdoc}
+     * @throws DriverException
      */
     public function createDriver(): DriverInterface
     {
@@ -40,25 +44,25 @@ class WebdriverClassicConfig extends AbstractConfig
 
     public function skipMessage($testCase, $test): ?string
     {
-        if (
-            $testCase === WindowTest::class
-            && $test === 'testWindowMaximize'
-            && getenv('GITHUB_ACTIONS') === 'true'
-        ) {
-            return 'Maximizing the window does not work when running the browser in Xvfb.';
+        switch (true) {
+            case $testCase === WindowTest::class && $test === 'testWindowMaximize' && $this->isXvfb():
+                return 'Maximizing the window does not work when running the browser in Xvfb.';
+
+            case $testCase === BasicAuthTest::class:
+                return 'Basic auth is not supported.';
+
+            case $testCase === HeaderTest::class:
+                return 'Headers are not supported.';
+
+            case $testCase === StatusCodeTest::class:
+                return 'Checking status code is not supported.';
+
+            case $testCase === EventsTest::class && $test === 'testKeyboardEvents' && $this->isOldChrome():
+                return 'Old Chrome does not allow triggering events.';
+
+            default:
+                return parent::skipMessage($testCase, $test);
         }
-
-        if ($testCase === HeaderTest::class) {
-            return 'Headers are not supported.';
-        }
-
-        if ($testCase === StatusCodeTest::class) {
-            return 'Checking status code is not supported.';
-        }
-
-        // TODO skip event tests for old chrome
-
-        return parent::skipMessage($testCase, $test);
     }
 
     /**
@@ -67,5 +71,16 @@ class WebdriverClassicConfig extends AbstractConfig
     protected function supportsCss(): bool
     {
         return true;
+    }
+
+    private function isXvfb(): bool
+    {
+        return getenv('GITHUB_ACTIONS') === 'true';
+    }
+
+    private function isOldChrome(): bool
+    {
+        return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
+            && version_compare(getenv('SELENIUM_VERSION'), '3', '<');
     }
 }
