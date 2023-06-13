@@ -37,8 +37,6 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    # We cannot trigger events in old chrome, so we allow the run to fail
-    continue-on-error: ${{ matrix.browser == 'chrome' && matrix.selenium == '2.53.1' }}
     strategy:
       matrix:
         php: [ '7.4', '8.0', '8.1', '8.2' ]
