@@ -67,9 +67,9 @@ class WebdriverClassicDriver extends CoreDriver
      * @throws DriverException
      */
     public function __construct(
-        string  $browserName = null,
-        array   $desiredCapabilities = null,
-        string  $webDriverHost = null,
+        string $browserName = null,
+        array $desiredCapabilities = null,
+        string $webDriverHost = null,
         Escaper $xpathEscaper = null
     ) {
         $this->browserName = $browserName ?? self::DEFAULT_BROWSER;
@@ -911,9 +911,9 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Returns Session ID of WebDriver or `null`, when session not started yet.
      *
-     * @api
      * @return string|null
      * @throws DriverException
+     * @api
      */
     public function getWebDriverSessionId(): ?string
     {
@@ -961,8 +961,8 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Globally press a key i.e. not typing into an element.
      *
-     * @api
      * @throws DriverException
+     * @api
      */
     public function globalKeyPress($char, $modifier = null): void
     {
@@ -979,12 +979,12 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Drag and drop an element by x,y pixels.
      *
-     * @api
      * @throws DriverException
+     * @api
      */
     public function dragBy(
         #[Language('XPath')]
-            $sourceXpath,
+        $sourceXpath,
         int $xOffset,
         int $yOffset
     ): void {
@@ -1119,7 +1119,7 @@ class WebdriverClassicDriver extends CoreDriver
     private function executeJsOnElement(
         RemoteWebElement $element,
         #[Language('JavaScript')]
-        string           $script
+        string $script
     ) {
         return $this->getWebDriver()->executeScript($script, [$element]);
     }
@@ -1237,7 +1237,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function findElement(
         #[Language('XPath')]
-        string           $xpath,
+        string $xpath,
         RemoteWebElement $parent = null
     ): RemoteWebElement {
         try {
@@ -1349,9 +1349,9 @@ class WebdriverClassicDriver extends CoreDriver
     private function ensureInputType(
         RemoteWebElement $element,
         #[Language('XPath')]
-        string           $xpath,
-        string           $type,
-        string           $action
+        string $xpath,
+        string $type,
+        string $action
     ): void {
         if ($element->getTagName() !== 'input' || $element->getAttribute('type') !== $type) {
             throw new DriverException(
