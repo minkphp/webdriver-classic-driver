@@ -55,8 +55,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     private DesiredCapabilities $desiredCapabilities;
 
-    private bool $started = false;
-
     private array $timeouts = [];
 
     private Escaper $xpathEscaper;
@@ -88,13 +86,16 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function start(): void
     {
+        if ($this->isStarted()) {
+            throw new DriverException('Driver has already been started');
+        }
+
         try {
             $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
             $this->applyTimeouts();
             $this->initialWindowName = $this->getWindowName();
-            $this->started = true;
         } catch (Throwable $e) {
-            throw new DriverException("Could not open connection: {$e->getMessage()}", 0, $e);
+            throw new DriverException("Could not start driver: {$e->getMessage()}", 0, $e);
         }
     }
 
@@ -119,7 +120,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function isStarted(): bool
     {
-        return $this->started;
+        return $this->webDriver !== null;
     }
 
     /**
@@ -129,12 +130,12 @@ class WebdriverClassicDriver extends CoreDriver
     public function stop(): void
     {
         if (!$this->webDriver) {
-            throw new DriverException('Could not connect to a Selenium / WebDriver server');
+            throw new DriverException('Driver has not been started');
         }
 
         try {
-            $this->started = false;
             $this->webDriver->quit();
+            $this->webDriver = null;
         } catch (Throwable $e) {
             throw new DriverException('Could not close connection', 0, $e);
         }
