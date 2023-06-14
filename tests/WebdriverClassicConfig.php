@@ -81,6 +81,6 @@ class WebdriverClassicConfig extends AbstractConfig
     private function isOldChrome(): bool
     {
         return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
-            && version_compare(getenv('SELENIUM_VERSION'), '3', '<');
+            && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
     }
 }

@@ -100,22 +100,6 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * Sets the timeouts to apply to the webdriver session
-     *
-     * @param array $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
-     * @throws DriverException
-     * @api
-     */
-    public function setTimeouts(array $timeouts): void
-    {
-        $this->timeouts = $timeouts;
-
-        if ($this->isStarted()) {
-            $this->applyTimeouts();
-        }
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function isStarted(): bool
@@ -209,7 +193,7 @@ class WebdriverClassicDriver extends CoreDriver
             $name = $this->getWindowHandleFromName($name);
         }
 
-        $this->getWebDriver()->switchTo()->window($name);
+        $this->getWebDriver()->switchTo()->window((string)$name);
     }
 
     /**
@@ -414,7 +398,7 @@ class WebdriverClassicDriver extends CoreDriver
     ) {
         $element = $this->findElement($xpath);
         $elementName = strtolower($element->getTagName() ?? '');
-        $elementType = strtolower($element->getAttribute('type') ?? '');
+        $elementType = strtolower((string)$element->getAttribute('type'));
 
         // Getting the value of a checkbox returns its value if selected.
         if ('input' === $elementName && 'checkbox' === $elementType) {
@@ -497,7 +481,7 @@ class WebdriverClassicDriver extends CoreDriver
                     }
                     return;
                 }
-                $this->selectOptionOnElement($element, $value);
+                $this->selectOptionOnElement($element, (string)$value);
                 return;
 
             case 'textarea':
@@ -506,7 +490,7 @@ class WebdriverClassicDriver extends CoreDriver
                 break;
 
             case 'input':
-                $elementType = strtolower($element->getAttribute('type') ?? '');
+                $elementType = strtolower((string)$element->getAttribute('type'));
                 switch ($elementType) {
                     case 'submit':
                     case 'image':
@@ -544,7 +528,7 @@ class WebdriverClassicDriver extends CoreDriver
                         return;
 
                     case 'radio':
-                        $this->selectRadioValue($element, $value);
+                        $this->selectRadioValue($element, (string)$value);
                         return;
 
                     case 'file':
@@ -622,15 +606,13 @@ class WebdriverClassicDriver extends CoreDriver
         $element = $this->findElement($xpath);
         $tagName = strtolower($element->getTagName() ?? '');
 
-        if ('input' === $tagName && 'radio' === strtolower($element->getAttribute('type') ?? '')) {
+        if ($tagName === 'input' && strtolower((string)$element->getAttribute('type')) === 'radio') {
             $this->selectRadioValue($element, $value);
-
             return;
         }
 
         if ('select' === $tagName) {
             $this->selectOptionOnElement($element, $value, $multiple);
-
             return;
         }
 
@@ -860,7 +842,7 @@ class WebdriverClassicDriver extends CoreDriver
         $this->withWindow(
             $name,
             fn() => $this
-                ->webDriver
+                ->getWebDriver()
                 ->manage()
                 ->window()
                 ->setSize(new WebDriverDimension($width, $height))
@@ -887,7 +869,7 @@ class WebdriverClassicDriver extends CoreDriver
         $this->withWindow(
             $name,
             fn() => $this
-                ->webDriver
+                ->getWebDriver()
                 ->manage()
                 ->window()
                 ->maximize()
@@ -947,6 +929,22 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * Sets the timeouts to apply to the webdriver session
+     *
+     * @param array $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
+     * @throws DriverException
+     * @api
+     */
+    public function setTimeouts(array $timeouts): void
+    {
+        $this->timeouts = $timeouts;
+
+        if ($this->isStarted()) {
+            $this->applyTimeouts();
+        }
+    }
+
+    /**
      * Gets the final desired capabilities (as sent to Selenium).
      *
      * @see http://code.google.com/p/selenium/wiki/DesiredCapabilities
@@ -964,7 +962,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @throws DriverException
      * @api
      */
-    public function globalKeyPress($char, $modifier = null): void
+    public function globalKeyPress(string $char, ?string $modifier = null): void
     {
         $keyboard = $this->getWebDriver()->getKeyboard();
         if ($modifier) {
@@ -984,7 +982,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function dragBy(
         #[Language('XPath')]
-        $sourceXpath,
+        string $sourceXpath,
         int $xOffset,
         int $yOffset
     ): void {
@@ -1001,11 +999,8 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function getWebDriver(): RemoteWebDriver
     {
-        if (!$this->isStarted()) {
-            throw new DriverException('Driver has not been started');
-        }
-
-        return $this->webDriver;
+        return $this->webDriver
+            ?? throw new DriverException('Driver has not been started');
     }
 
     /**
@@ -1053,7 +1048,8 @@ class WebdriverClassicDriver extends CoreDriver
         );
 
         if (!$hasSyn) {
-            $synJs = file_get_contents(__DIR__ . '/../resources/syn.js');
+            $synJs = file_get_contents(__DIR__ . '/../resources/syn.js')
+                ?: throw new DriverException('Could not load syn.js resource');
             $this->getWebDriver()->executeScript($synJs);
         }
 
@@ -1263,12 +1259,17 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         $name = $element->getAttribute('name');
-
         if (!$name) {
             throw new DriverException(sprintf('The radio button does not have the value "%s"', $value));
         }
+        if ($name === true) {
+            $name = '';
+        }
 
         $formId = $element->getAttribute('form');
+        if ($formId === true) {
+            $formId = '';
+        }
 
         try {
             $escapedName = $this->xpathEscaper->escapeLiteral($name);
