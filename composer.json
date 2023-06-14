@@ -15,7 +15,7 @@
     "require": {
         "php": ">=7.4",
         "ext-json": "*",
-        "behat/mink": "^1.9@dev",
+        "behat/mink": "^1.11@dev",
         "php-webdriver/webdriver": "^1.14"
     },
     "require-dev": {

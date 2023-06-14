@@ -15,7 +15,6 @@ namespace Mink\WebdriverClassDriver;
 use Behat\Mink\Driver\CoreDriver;
 use Behat\Mink\Exception\DriverException;
 use Behat\Mink\Selector\Xpath\Escaper;
-use Exception;
 use Facebook\WebDriver\Exception\NoSuchCookieException;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\Exception\WebDriverException;
@@ -95,7 +94,7 @@ class WebdriverClassicDriver extends CoreDriver
             $this->applyTimeouts();
             $this->initialWindowName = $this->getWindowName();
         } catch (Throwable $e) {
-            throw new DriverException("Could not start driver: {$e->getMessage()}", 0, $this->wrapError($e));
+            throw new DriverException("Could not start driver: {$e->getMessage()}", 0, $e);
         }
     }
 
@@ -120,7 +119,7 @@ class WebdriverClassicDriver extends CoreDriver
             $this->getWebDriver()->quit();
             $this->webDriver = null;
         } catch (Throwable $e) {
-            throw new DriverException('Could not close connection', 0, $this->wrapError($e));
+            throw new DriverException('Could not close connection', 0, $e);
         }
     }
 
@@ -1108,7 +1107,7 @@ class WebdriverClassicDriver extends CoreDriver
                 }
             }
         } catch (Throwable $e) {
-            throw new DriverException("Error setting timeout: {$e->getMessage()}", 0, $this->wrapError($e));
+            throw new DriverException("Error setting timeout: {$e->getMessage()}", 0, $e);
         }
     }
 
@@ -1207,7 +1206,7 @@ class WebdriverClassicDriver extends CoreDriver
                 ? $parent->findElement($finder)
                 : $this->getWebDriver()->findElement($finder);
         } catch (Throwable $e) {
-            throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $this->wrapError($e));
+            throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
         }
     }
 
@@ -1350,11 +1349,6 @@ class WebdriverClassicDriver extends CoreDriver
         } catch (JsonException $e) {
             throw new DriverException("Cannot $action, $field not serializable: {$e->getMessage()}", 0, $e);
         }
-    }
-
-    private function wrapError(Throwable $e): Exception
-    {
-        return $e instanceof Exception ? $e : new ErrorException($e);
     }
 
     // </editor-fold>
