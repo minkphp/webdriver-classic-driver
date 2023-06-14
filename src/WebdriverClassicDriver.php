@@ -1246,7 +1246,7 @@ class WebdriverClassicDriver extends CoreDriver
             }
             try {
                 $select->selectByValue($value);
-            } catch (NoSuchElementException) {
+            } catch (NoSuchElementException $e) {
                 $select->selectByVisibleText($value);
             }
         } catch (Throwable $e) {
