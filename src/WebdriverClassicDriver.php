@@ -1004,8 +1004,11 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function getWebDriver(): RemoteWebDriver
     {
-        return $this->webDriver
-            ?? throw new DriverException('Driver has not been started');
+        if ($this->webDriver) {
+            return $this->webDriver;
+        }
+
+        throw new DriverException('Driver has not been started');
     }
 
     /**
@@ -1051,13 +1054,16 @@ class WebdriverClassicDriver extends CoreDriver
         $hasSyn = $this->evaluateScript(
             'return window.syn !== undefined && window.syn.trigger !== undefined'
         );
-
-        if (!$hasSyn) {
-            $synJs = file_get_contents(__DIR__ . '/../resources/syn.js')
-                ?: throw new DriverException('Could not load syn.js resource');
-            $this->getWebDriver()->executeScript($synJs);
+        if ($hasSyn) {
+            return $this;
         }
 
+        $synJs = file_get_contents(__DIR__ . '/../resources/syn.js');
+        if (!$synJs) {
+            throw new DriverException('Could not load syn.js resource');
+        }
+
+        $this->getWebDriver()->executeScript($synJs);
         return $this;
     }
 
