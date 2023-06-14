@@ -14,6 +14,8 @@ class TimeoutTest extends TestCase
     protected function resetSessions(): void
     {
         $session = $this->getSession();
+        $driver = $this->getSession()->getDriver();
+        assert($driver instanceof WebdriverClassicDriver);
 
         // Stop the session instead of only resetting it, as timeouts are not reset (they are configuring the session itself)
         if ($session->isStarted()) {
@@ -21,7 +23,7 @@ class TimeoutTest extends TestCase
         }
 
         // Reset the array of timeouts to avoid impacting other tests
-        $this->getDriver()->setTimeouts([]);
+        $driver->setTimeouts([]);
 
         parent::resetSessions();
     }
@@ -29,7 +31,8 @@ class TimeoutTest extends TestCase
     public function testInvalidTimeoutSettingThrowsException(): void
     {
         $this->getSession()->start();
-        $driver = $this->getDriver();
+        $driver = $this->getSession()->getDriver();
+        assert($driver instanceof WebdriverClassicDriver);
 
         $this->expectException(DriverException::class);
 
@@ -38,12 +41,12 @@ class TimeoutTest extends TestCase
 
     public function testShortTimeoutDoesNotWaitForElementToAppear(): void
     {
-        $this->getDriver()->setTimeouts(['implicit' => 0]);
+        $driver = $this->getSession()->getDriver();
+        assert($driver instanceof WebdriverClassicDriver);
+        $driver->setTimeouts(['implicit' => 0]);
 
         $this->getSession()->visit($this->pathTo('/js_test.html'));
-
         $this->findById('waitable')->click();
-
         $element = $this->getSession()->getPage()->find('css', '#waitable > div');
 
         $this->assertNull($element);
@@ -51,18 +54,14 @@ class TimeoutTest extends TestCase
 
     public function testLongTimeoutWaitsForElementToAppear(): void
     {
-        $this->getDriver()->setTimeouts(['implicit' => 5000]);
+        $driver = $this->getSession()->getDriver();
+        assert($driver instanceof WebdriverClassicDriver);
+        $driver->setTimeouts(['implicit' => 5000]);
 
         $this->getSession()->visit($this->pathTo('/js_test.html'));
         $this->findById('waitable')->click();
         $element = $this->getSession()->getPage()->find('css', '#waitable > div');
 
         $this->assertNotNull($element);
-    }
-
-    private function getDriver(): WebdriverClassicDriver
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->getSession()->getDriver();
     }
 }

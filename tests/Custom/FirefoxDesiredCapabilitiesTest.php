@@ -44,6 +44,7 @@ class FirefoxDesiredCapabilitiesTest extends TestCase
         ];
 
         $driver = new WebdriverClassicDriver('firefox', $caps);
+
         $this->assertNotEmpty($driver->getDesiredCapabilities(), 'desiredCapabilities empty');
         $this->assertIsArray($driver->getDesiredCapabilities());
         $this->assertEquals($caps, $driver->getDesiredCapabilities());
@@ -51,8 +52,6 @@ class FirefoxDesiredCapabilitiesTest extends TestCase
 
     public function testSetDesiredCapabilities(): void
     {
-        $this->expectException(DriverException::class);
-        $this->expectExceptionMessage('Unable to set desiredCapabilities, the session has already started');
         $caps = [
             'browserName' => 'firefox',
             'version' => '30',
@@ -65,12 +64,12 @@ class FirefoxDesiredCapabilitiesTest extends TestCase
         ];
         $session = $this->getSession();
         $session->start();
-        $this->getDriver()->setDesiredCapabilities($caps);
-    }
+        $driver = $this->getSession()->getDriver();
+        assert($driver instanceof WebdriverClassicDriver);
 
-    private function getDriver(): WebdriverClassicDriver
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->getSession()->getDriver();
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Unable to set desiredCapabilities, the session has already started');
+
+        $driver->setDesiredCapabilities($caps);
     }
 }
