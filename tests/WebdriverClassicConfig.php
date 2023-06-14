@@ -8,7 +8,7 @@ use Mink\WebdriverClassDriver\WebdriverClassicDriver;
 
 class WebdriverClassicConfig extends AbstractConfig
 {
-    public static function getInstance()
+    public static function getInstance(): self
     {
         return new self();
     }
@@ -20,10 +20,12 @@ class WebdriverClassicConfig extends AbstractConfig
 
     public function skipMessage($testCase, $test): ?string
     {
+        /** @phpstan-ignore-next-line */
         if (true) {
             return 'TODO: implement the initial driver';
         }
 
+        /** @phpstan-ignore-next-line */
         return parent::skipMessage($testCase, $test);
     }
 
