@@ -129,6 +129,15 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function reset(): void
     {
+        // switch to default window..
+        $this->switchToWindow();
+        // ..and close all other windows
+        foreach ($this->getWindowNames() as $name) {
+            if ($name !== $this->initialWindowName) {
+                $this->withWindow($name, fn() => $this->getWebDriver()->close());
+            }
+        }
+
         $this->getWebDriver()->manage()->deleteAllCookies();
     }
 
