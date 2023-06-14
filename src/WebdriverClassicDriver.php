@@ -14,7 +14,6 @@ namespace Mink\WebdriverClassDriver;
 
 use Behat\Mink\Driver\CoreDriver;
 use Behat\Mink\Exception\DriverException;
-use Behat\Mink\Selector\Xpath\Escaper;
 use Facebook\WebDriver\Exception\NoSuchCookieException;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\Exception\WebDriverException;
@@ -23,6 +22,8 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverDimension;
+use Facebook\WebDriver\WebDriverRadios;
+use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
 use JsonException;
 use Throwable;
@@ -57,8 +58,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     private array $timeouts = [];
 
-    private Escaper $xpathEscaper;
-
     private string $webDriverHost;
 
     private ?string $initialWindowName = null;
@@ -69,13 +68,11 @@ class WebdriverClassicDriver extends CoreDriver
     public function __construct(
         string $browserName = null,
         array $desiredCapabilities = null,
-        string $webDriverHost = null,
-        Escaper $xpathEscaper = null
+        string $webDriverHost = null
     ) {
         $this->browserName = $browserName ?? self::DEFAULT_BROWSER;
         $this->setDesiredCapabilities($this->initCapabilities($desiredCapabilities ?? []));
         $this->webDriverHost = $webDriverHost ?? 'http://localhost:4444/wd/hub';
-        $this->xpathEscaper = $xpathEscaper ?? new Escaper();
     }
 
     // <editor-fold desc="Implementation">
@@ -1224,50 +1221,17 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function selectRadioValue(RemoteWebElement $element, string $value): void
     {
-        // short-circuit when we already have the right button of the group to avoid XPath queries
-        if ($element->getAttribute('value') === $value) {
-            $element->click();
-
-            return;
-        }
-
-        $name = $element->getAttribute('name');
-        if (!$name) {
-            throw new DriverException(sprintf('The radio button does not have the value "%s"', $value));
-        }
-        if ($name === true) {
-            $name = '';
-        }
-
-        $formId = $element->getAttribute('form');
-        if ($formId === true) {
-            $formId = '';
-        }
-
         try {
-            $escapedName = $this->xpathEscaper->escapeLiteral($name);
-            $escapedValue = $this->xpathEscaper->escapeLiteral($value);
-            if (null !== $formId) {
-                $escapedFormId = $this->xpathEscaper->escapeLiteral($formId);
-                $input = $this->findElement(
-                    <<<"XPATH"
-                    //form[@id=$escapedFormId]//input[@type="radio" and not(@form) and @name=$escapedName and @value=$escapedValue]
-                    |
-                    //input[@type="radio" and @form=$escapedFormId and @name=$escapedName and @value=$escapedValue]
-                    XPATH
-                );
-            } else {
-                $input = $this->findElement(
-                    "./ancestor::form//input[@type=\"radio\" and not(@form) and @name=$escapedName and @value=$escapedValue]",
-                    $element
-                );
-            }
-        } catch (DriverException $e) {
-            $message = sprintf('The radio group "%s" does not have an option "%s"', $name, $value);
+            (new WebDriverRadios($element))->selectByValue($value);
+        } catch (Throwable $e) {
+            $message = sprintf(
+                'Cannot select radio button of group "%s" with value "%s": %s',
+                $element->getAttribute('name'),
+                $value,
+                $e->getMessage()
+            );
             throw new DriverException($message, 0, $e);
         }
-
-        $input->click();
     }
 
     /**
@@ -1275,26 +1239,21 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function selectOptionOnElement(RemoteWebElement $element, string $value, bool $multiple = false): void
     {
-        $escapedValue = $this->xpathEscaper->escapeLiteral($value);
-        // The value of an option is the normalized version of its text when it has no value attribute
-        $optionQuery = sprintf(
-            './/option[@value = %s or (not(@value) and normalize-space(.) = %s)]',
-            $escapedValue,
-            $escapedValue
-        );
-        $option = $this->findElement($optionQuery, $element); // Avoids selecting values from other select boxes
-
-        if ($multiple || !$element->getAttribute('multiple')) {
-            if (!$option->isSelected()) {
-                $option->click();
+        try {
+            $select = new WebDriverSelect($element);
+            if (!$multiple || !$select->isMultiple()) {
+                $select->deselectAll();
             }
-
-            return;
+            $select->selectByValue($value);
+        } catch (Throwable $e) {
+            $message = sprintf(
+                'Cannot select option "%s" of "%s": %s',
+                $value,
+                $element->getAttribute('name'),
+                $e->getMessage(),
+            );
+            throw new DriverException($message, 0, $e);
         }
-
-        // Deselect all options before selecting the new one
-        $this->deselectAllOptions($element);
-        $option->click();
     }
 
     /**
@@ -1306,15 +1265,16 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function deselectAllOptions(RemoteWebElement $element): void
     {
-        $script = <<<JS
-            var node = arguments[0];
-            var i, l = node.options.length;
-            for (i = 0; i < l; i++) {
-                node.options[i].selected = false;
-            }
-            JS;
-
-        $this->executeJsOnElement($element, $script);
+        try {
+            (new WebDriverSelect($element))->deselectAll();
+        } catch (Throwable $e) {
+            $message = sprintf(
+                'Cannot deselect all options of "%s": %s',
+                $element->getAttribute('name'),
+                $e->getMessage()
+            );
+            throw new DriverException($message, 0, $e);
+        }
     }
 
     /**
