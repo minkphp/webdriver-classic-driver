@@ -59,8 +59,6 @@ jobs:
           coverage: "xdebug"
           php-version: "${{ matrix.php }}"
           ini-file: development
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: |

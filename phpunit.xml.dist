@@ -29,6 +29,8 @@
 
         <!-- where DocumentRoot of 'Test Machine' is mounted to on 'Driver Machine' (only if these are 2 different machines) -->
         <server name="DRIVER_MACHINE_BASE_PATH" value="/fixtures/"/>
+
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
     </php>
 
     <listeners>
