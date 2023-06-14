@@ -23,10 +23,16 @@ class WebDriverTest extends TestCase
 
     public function testGetWebDriverSessionId(): void
     {
-        $driver = $this->getSession()->getDriver();
-        $this->assertNotEmpty($driver->getWebDriverSessionId(), 'Started session has an ID');
+        $driver = $this->getDriver();
+        $this->assertNotEmpty($driver->getWebDriverSessionId(), 'Started session should have an ID');
 
         $driver = new WebdriverClassicDriver();
-        $this->assertNull($driver->getWebDriverSessionId(), 'Not started session don\'t have an ID');
+        $this->assertNull($driver->getWebDriverSessionId(), 'Non-started session should not have an ID');
+    }
+
+    private function getDriver(): WebdriverClassicDriver
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->getSession()->getDriver();
     }
 }

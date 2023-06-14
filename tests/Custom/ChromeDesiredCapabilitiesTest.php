@@ -65,7 +65,12 @@ class ChromeDesiredCapabilitiesTest extends TestCase
         ];
         $session = $this->getSession();
         $session->start();
-        $driver = $session->getDriver();
-        $driver->setDesiredCapabilities($caps);
+        $this->getDriver()->setDesiredCapabilities($caps);
+    }
+
+    private function getDriver(): WebdriverClassicDriver
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->getSession()->getDriver();
     }
 }

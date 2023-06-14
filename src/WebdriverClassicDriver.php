@@ -529,6 +529,9 @@ class WebdriverClassicDriver extends CoreDriver
                         return;
 
                     case 'radio':
+                        if (is_array($value)) {
+                            throw new DriverException('Cannot select multiple radio buttons; value cannot be an array');
+                        }
                         $this->selectRadioValue($element, (string)$value);
                         return;
 
