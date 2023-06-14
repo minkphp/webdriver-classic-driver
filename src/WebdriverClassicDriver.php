@@ -385,11 +385,11 @@ class WebdriverClassicDriver extends CoreDriver
         $elementType = strtolower((string)$element->getAttribute('type'));
 
         // Getting the value of a checkbox returns its value if selected.
-        if ('input' === $elementName && 'checkbox' === $elementType) {
+        if ($elementName === 'input' && $elementType === 'checkbox') {
             return $element->isSelected() ? $element->getAttribute('value') : null;
         }
 
-        if ('input' === $elementName && 'radio' === $elementType) {
+        if ($elementName === 'input' && $elementType === 'radio') {
             $script = <<<JS
                 var node = arguments[0],
                     value = null;
@@ -415,7 +415,7 @@ class WebdriverClassicDriver extends CoreDriver
 
         // Using $element->attribute('value') on a select only returns the first selected option
         // even when it is a multiple select, so a custom retrieval is needed.
-        if ('select' === $elementName && $element->getAttribute('multiple')) {
+        if ($elementName === 'select' && $element->getAttribute('multiple')) {
             $script = <<<JS
                 var node = arguments[0],
                     value = [];
@@ -433,7 +433,7 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         // use textarea.value rather than textarea.getAttribute(value) for chrome 91+ support
-        if ('textarea' === $elementName) {
+        if ($elementName === 'textarea') {
             $script = <<<JS
                 var node = arguments[0];
                 return node.value;
@@ -593,7 +593,7 @@ class WebdriverClassicDriver extends CoreDriver
             return;
         }
 
-        if ('select' === $tagName) {
+        if ($tagName === 'select') {
             $this->selectOptionOnElement($element, $value, $multiple);
             return;
         }
@@ -1241,10 +1241,14 @@ class WebdriverClassicDriver extends CoreDriver
     {
         try {
             $select = new WebDriverSelect($element);
-            if (!$multiple || !$select->isMultiple()) {
+            if (!$multiple && $select->isMultiple()) {
                 $select->deselectAll();
             }
-            $select->selectByValue($value);
+            try {
+                $select->selectByValue($value);
+            } catch (NoSuchElementException) {
+                $select->selectByVisibleText($value);
+            }
         } catch (Throwable $e) {
             $message = sprintf(
                 'Cannot select option "%s" of "%s": %s',
