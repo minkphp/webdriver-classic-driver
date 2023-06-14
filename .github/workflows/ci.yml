@@ -80,6 +80,7 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
+        # See https://github.com/nektos/act#skipping-steps
         if: ${{ !env.ACT }}
         with:
           files: coverage.xml
