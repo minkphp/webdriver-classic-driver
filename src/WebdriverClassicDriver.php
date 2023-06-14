@@ -83,7 +83,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function start(): void
     {
@@ -110,7 +109,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function stop(): void
     {
@@ -137,7 +135,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function visit($url): void
     {
@@ -146,7 +143,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getCurrentUrl(): string
     {
@@ -155,7 +151,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function reload(): void
     {
@@ -164,7 +159,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function forward(): void
     {
@@ -173,7 +167,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function back(): void
     {
@@ -182,7 +175,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function switchToWindow($name = null): void
     {
@@ -199,12 +191,11 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function switchToIFrame($name = null): void
     {
         $frameQuery = $name;
-        if ($name && is_string($name) && $this->getWebDriver()->isW3cCompliant()) {
+        if ($name && $this->getWebDriver()->isW3cCompliant()) {
             try {
                 $frameQuery = $this->getWebDriver()->findElement(WebDriverBy::id($name));
             } catch (NoSuchElementException $e) {
@@ -217,7 +208,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function setCookie($name, $value = null): void
     {
@@ -238,7 +228,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getCookie($name): ?string
     {
@@ -261,7 +250,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getContent(): string
     {
@@ -270,7 +258,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getScreenshot(): string
     {
@@ -279,7 +266,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getWindowNames(): array
     {
@@ -299,7 +285,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getWindowName(): string
     {
@@ -314,7 +299,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function findElementXpaths(
         #[Language('XPath')]
@@ -332,7 +316,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getTagName(
         #[Language('XPath')]
@@ -343,7 +326,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getText(
         #[Language('XPath')]
@@ -354,7 +336,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getHtml(
         #[Language('XPath')]
@@ -365,7 +346,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getOuterHtml(
         #[Language('XPath')]
@@ -376,7 +356,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getAttribute(
         #[Language('XPath')]
@@ -391,7 +370,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function getValue(
         #[Language('XPath')]
@@ -463,7 +441,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function setValue(
         #[Language('XPath')]
@@ -552,7 +529,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function check(
         #[Language('XPath')]
@@ -570,7 +546,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function uncheck(
         #[Language('XPath')]
@@ -588,7 +563,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function isChecked(
         #[Language('XPath')]
@@ -599,7 +573,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function selectOption(
         #[Language('XPath')]
@@ -626,7 +599,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function isSelected(
         #[Language('XPath')]
@@ -637,7 +609,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function click(
         #[Language('XPath')]
@@ -648,7 +619,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function doubleClick(
         #[Language('XPath')]
@@ -659,7 +629,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function rightClick(
         #[Language('XPath')]
@@ -670,7 +639,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function attachFile(
         #[Language('XPath')]
@@ -687,7 +655,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function isVisible(
         #[Language('XPath')]
@@ -698,7 +665,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function mouseOver(
         #[Language('XPath')]
@@ -709,7 +675,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function focus(
         #[Language('XPath')]
@@ -720,7 +685,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function blur(
         #[Language('XPath')]
@@ -731,7 +695,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function keyPress(
         #[Language('XPath')]
@@ -745,7 +708,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function keyDown(
         #[Language('XPath')]
@@ -759,7 +721,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function keyUp(
         #[Language('XPath')]
@@ -773,7 +734,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function dragTo(
         #[Language('XPath')]
@@ -788,7 +748,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function executeScript(
         #[Language('JavaScript')]
@@ -805,7 +764,6 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      * @return mixed
-     * @throws DriverException
      */
     public function evaluateScript(
         #[Language('JavaScript')]
@@ -820,7 +778,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function wait(
         $timeout,
@@ -840,7 +797,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function resizeWindow($width, $height, $name = null): void
     {
@@ -856,7 +812,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function submitForm(
         #[Language('XPath')]
@@ -867,7 +822,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @throws DriverException
      */
     public function maximizeWindow($name = null): void
     {
