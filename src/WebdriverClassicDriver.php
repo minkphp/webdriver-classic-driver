@@ -22,6 +22,7 @@ use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverDimension;
+use Facebook\WebDriver\WebDriverElement;
 use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
@@ -66,13 +67,13 @@ class WebdriverClassicDriver extends CoreDriver
      * @throws DriverException
      */
     public function __construct(
-        string $browserName = null,
-        array $desiredCapabilities = null,
-        string $webDriverHost = null
+        string $browserName = self::DEFAULT_BROWSER,
+        array $desiredCapabilities = [],
+        string $webDriverHost = 'http://localhost:4444/wd/hub'
     ) {
-        $this->browserName = $browserName ?? self::DEFAULT_BROWSER;
-        $this->setDesiredCapabilities($this->initCapabilities($desiredCapabilities ?? []));
-        $this->webDriverHost = $webDriverHost ?? 'http://localhost:4444/wd/hub';
+        $this->browserName = $browserName;
+        $this->setDesiredCapabilities($this->initCapabilities($desiredCapabilities));
+        $this->webDriverHost = $webDriverHost;
     }
 
     // <editor-fold desc="Implementation">
@@ -141,7 +142,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function visit($url): void
+    public function visit(string $url): void
     {
         $this->getWebDriver()->navigate()->to($url);
     }
@@ -181,7 +182,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function switchToWindow($name = null): void
+    public function switchToWindow(?string $name = null): void
     {
         if ($name === null) {
             $name = $this->initialWindowName;
@@ -197,7 +198,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function switchToIFrame($name = null): void
+    public function switchToIFrame(?string $name = null): void
     {
         $frameQuery = $name;
         if ($name && $this->getWebDriver()->isW3cCompliant()) {
@@ -214,7 +215,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function setCookie($name, $value = null): void
+    public function setCookie(string $name, ?string $value = null): void
     {
         if (null === $value) {
             $this->getWebDriver()->manage()->deleteCookieNamed($name);
@@ -234,7 +235,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function getCookie($name): ?string
+    public function getCookie(string $name): ?string
     {
         try {
             $result = $this->getWebDriver()->manage()->getCookieNamed($name);
@@ -245,12 +246,7 @@ class WebdriverClassicDriver extends CoreDriver
             return null;
         }
 
-        $result = $result->getValue();
-        if ($result === null) {
-            return null;
-        }
-
-        return rawurldecode($result);
+        return rawurldecode($result->getValue());
     }
 
     /**
@@ -305,9 +301,9 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function findElementXpaths(
+    protected function findElementXpaths(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): array {
         $nodes = $this->getWebDriver()->findElements(WebDriverBy::xpath($xpath));
 
@@ -324,7 +320,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getTagName(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): string {
         return $this->findElement($xpath)->getTagName();
     }
@@ -334,7 +330,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getText(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): string {
         return str_replace(["\r", "\n"], ' ', $this->findElement($xpath)->getText());
     }
@@ -344,7 +340,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getHtml(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): string {
         return $this->executeJsOnXpath($xpath, 'return arguments[0].innerHTML;');
     }
@@ -354,7 +350,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getOuterHtml(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): string {
         return $this->executeJsOnXpath($xpath, 'return arguments[0].outerHTML;');
     }
@@ -364,8 +360,8 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getAttribute(
         #[Language('XPath')]
-        $xpath,
-        $name
+        string $xpath,
+        string $name
     ): ?string {
         $escapedName = $this->jsonEncode($name, 'get attribute', 'attribute name');
         $script = "return arguments[0].getAttribute($escapedName)";
@@ -378,70 +374,43 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getValue(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ) {
         $element = $this->findElement($xpath);
         $elementName = strtolower($element->getTagName() ?? '');
         $elementType = strtolower((string)$element->getAttribute('type'));
+        $widgetType = $elementName === 'input' ? $elementType : $elementName;
 
-        // Getting the value of a checkbox returns its value if selected.
-        if ($elementName === 'input' && $elementType === 'checkbox') {
-            return $element->isSelected() ? $element->getAttribute('value') : null;
-        }
-
-        if ($elementName === 'input' && $elementType === 'radio') {
-            $script = <<<JS
-                var node = arguments[0],
-                    value = null;
-
-                var name = node.getAttribute('name');
-                if (name) {
-                    var fields = window.document.getElementsByName(name),
-                        i, l = fields.length;
-                    for (i = 0; i < l; i++) {
-                        var field = fields.item(i);
-                        if (field.form === node.form && field.checked) {
-                            value = field.value;
-                            break;
-                        }
+        try {
+            switch (true) {
+                case $widgetType === 'radio':
+                    $radioElement = new WebDriverRadios($element);
+                    try {
+                        return $radioElement->getFirstSelectedOption()->getAttribute('value');
+                    } catch (NoSuchElementException $e) {
+                        return null;
                     }
-                }
 
-                return value;
-                JS;
+                case $widgetType === 'checkbox':
+                    // WebDriverCheckboxes is not suitable since it _always_ behaves as a group
+                    return $element->isSelected() ? $element->getAttribute('value') : null;
 
-            return $this->executeJsOnElement($element, $script);
+                case $widgetType === 'select':
+                    $selectElement = new WebDriverSelect($element);
+                    $selectedOptions = array_map(
+                        static fn(WebDriverElement $option) => $option->getAttribute('value'),
+                        $selectElement->getAllSelectedOptions()
+                    );
+                    return $selectElement->isMultiple() ? $selectedOptions : ($selectedOptions[0] ?? '');
+
+                default:
+                    return $this->getWebDriver()->isW3cCompliant()
+                        ? $element->getDomProperty('value')
+                        : $this->executeJsOnElement($element, 'return arguments[0].value');
+            }
+        } catch (Throwable $e) {
+            throw new DriverException("Cannot retrieve $widgetType value: {$e->getMessage()}", 0, $e);
         }
-
-        // Using $element->attribute('value') on a select only returns the first selected option
-        // even when it is a multiple select, so a custom retrieval is needed.
-        if ($elementName === 'select' && $element->getAttribute('multiple')) {
-            $script = <<<JS
-                var node = arguments[0],
-                    value = [];
-
-                for (var i = 0; i < node.options.length; i++) {
-                    if (node.options[i].selected) {
-                        value.push(node.options[i].value);
-                    }
-                }
-
-                return value;
-                JS;
-
-            return $this->executeJsOnElement($element, $script);
-        }
-
-        // use textarea.value rather than textarea.getAttribute(value) for chrome 91+ support
-        if ($elementName === 'textarea') {
-            $script = <<<JS
-                var node = arguments[0];
-                return node.value;
-                JS;
-            return $this->executeJsOnElement($element, $script);
-        }
-
-        return $element->getAttribute('value');
     }
 
     /**
@@ -449,13 +418,21 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function setValue(
         #[Language('XPath')]
-        $xpath,
+        string $xpath,
         $value
     ): void {
         $element = $this->findElement($xpath);
         $elementName = strtolower($element->getTagName() ?? '');
 
         switch ($elementName) {
+            case 'textarea':
+                if (!is_string($value)) {
+                    throw new DriverException('Textarea value must be a string');
+                }
+                $element->clear();
+                $element->sendKeys($value);
+                break;
+
             case 'select':
                 if (is_array($value)) {
                     $this->deselectAllOptions($element);
@@ -467,11 +444,6 @@ class WebdriverClassicDriver extends CoreDriver
                 $this->selectOptionOnElement($element, (string)$value);
                 return;
 
-            case 'textarea':
-                $element->clear();
-                $element->sendKeys($value);
-                break;
-
             case 'input':
                 $elementType = strtolower((string)$element->getAttribute('type'));
                 switch ($elementType) {
@@ -479,10 +451,13 @@ class WebdriverClassicDriver extends CoreDriver
                     case 'image':
                     case 'button':
                     case 'reset':
-                        $message = 'Cannot set value an element with XPath "%s" as it is not a select, textarea or textbox';
+                        $message = 'Cannot set value on element with XPath "%s" as it is not a select, textarea or textbox';
                         throw new DriverException(sprintf($message, $xpath));
 
                     case 'color':
+                        if (!is_string($value)) {
+                            throw new DriverException('Color value must be a string');
+                        }
                         // one cannot simply type into a color field, nor clear it
                         $this->executeJsOnElement(
                             $element,
@@ -511,21 +486,26 @@ class WebdriverClassicDriver extends CoreDriver
                         return;
 
                     case 'radio':
-                        if (is_array($value)) {
-                            throw new DriverException('Cannot select multiple radio buttons; value cannot be an array');
+                        if (!is_string($value)) {
+                            throw new DriverException('Value must be a string');
                         }
-                        $this->selectRadioValue($element, (string)$value);
+                        $this->selectRadioValue($element, $value);
                         return;
 
                     case 'file':
-                        // @todo - Check if this is correct way to upload files
+                        if (!is_string($value)) {
+                            throw new DriverException('Value must be a string');
+                        }
                         $element->sendKeys($value);
-                        // $element->postValue(['value' => [(string)$value]]);
-                        return;
+                        break;
 
                     default:
+                        if (!is_string($value)) {
+                            throw new DriverException('Value must be a string');
+                        }
                         $element->clear();
                         $element->sendKeys($value);
+                        break;
                 }
         }
 
@@ -537,7 +517,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function check(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $element = $this->findElement($xpath);
         $this->ensureInputType($element, $xpath, 'checkbox', 'check');
@@ -554,7 +534,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function uncheck(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $element = $this->findElement($xpath);
         $this->ensureInputType($element, $xpath, 'checkbox', 'uncheck');
@@ -571,7 +551,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function isChecked(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): bool {
         return $this->findElement($xpath)->isSelected();
     }
@@ -581,9 +561,9 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function selectOption(
         #[Language('XPath')]
-        $xpath,
-        $value,
-        $multiple = false
+        string $xpath,
+        string $value,
+        bool $multiple = false
     ): void {
         $element = $this->findElement($xpath);
         $tagName = strtolower($element->getTagName() ?? '');
@@ -607,7 +587,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function isSelected(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): bool {
         return $this->findElement($xpath)->isSelected();
     }
@@ -617,7 +597,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function click(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->clickOnElement($this->findElement($xpath));
     }
@@ -627,7 +607,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function doubleClick(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->doubleClickOnElement($this->findElement($xpath));
     }
@@ -637,7 +617,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function rightClick(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->rightClickOnElement($this->findElement($xpath));
     }
@@ -647,15 +627,13 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function attachFile(
         #[Language('XPath')]
-        $xpath,
+        string $xpath,
         #[Language('file-reference')]
-        $path
+        string $path
     ): void {
         $element = $this->findElement($xpath);
         $this->ensureInputType($element, $xpath, 'file', 'attach a file on');
-
-        // @todo - Check if this is the correct way to upload files
-        $element->sendKeys($path);
+        $this->setValue($xpath, $path);
     }
 
     /**
@@ -663,7 +641,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function isVisible(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): bool {
         return $this->findElement($xpath)->isDisplayed();
     }
@@ -673,7 +651,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function mouseOver(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->mouseOverElement($this->findElement($xpath));
     }
@@ -683,7 +661,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function focus(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->trigger($xpath, 'focus');
     }
@@ -693,7 +671,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function blur(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->trigger($xpath, 'blur');
     }
@@ -703,9 +681,9 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function keyPress(
         #[Language('XPath')]
-        $xpath,
+        string $xpath,
         $char,
-        $modifier = null
+        ?string $modifier = null
     ): void {
         $options = $this->charToSynOptions($char, $modifier);
         $this->trigger($xpath, 'keypress', $options);
@@ -716,9 +694,9 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function keyDown(
         #[Language('XPath')]
-        $xpath,
+        string $xpath,
         $char,
-        $modifier = null
+        ?string $modifier = null
     ): void {
         $options = $this->charToSynOptions($char, $modifier);
         $this->trigger($xpath, 'keydown', $options);
@@ -729,9 +707,9 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function keyUp(
         #[Language('XPath')]
-        $xpath,
+        string $xpath,
         $char,
-        $modifier = null
+        ?string $modifier = null
     ): void {
         $options = $this->charToSynOptions($char, $modifier);
         $this->trigger($xpath, 'keyup', $options);
@@ -742,9 +720,9 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function dragTo(
         #[Language('XPath')]
-        $sourceXpath,
+        string $sourceXpath,
         #[Language('XPath')]
-        $destinationXpath
+        string $destinationXpath
     ): void {
         $source = $this->findElement($sourceXpath);
         $destination = $this->findElement($destinationXpath);
@@ -756,11 +734,10 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function executeScript(
         #[Language('JavaScript')]
-        $script
+        string $script
     ): void {
-        if (preg_match('/^function[\s(]/', $script ?? '')) {
-            $script = preg_replace('/;$/', '', $script ?? '');
-            $script = '(' . $script . ')';
+        if (preg_match('/^function[\s(]/', $script)) {
+            $script = '(' . rtrim($script, ';') . ')';
         }
 
         $this->getWebDriver()->executeScript($script);
@@ -772,9 +749,9 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function evaluateScript(
         #[Language('JavaScript')]
-        $script
+        string $script
     ) {
-        if (strncmp(ltrim((string)$script), 'return ', 7) !== 0) {
+        if (strncmp(ltrim($script), 'return ', 7) !== 0) {
             $script = "return $script;";
         }
 
@@ -785,9 +762,9 @@ class WebdriverClassicDriver extends CoreDriver
      * {@inheritdoc}
      */
     public function wait(
-        $timeout,
+        int $timeout,
         #[Language('JavaScript')]
-        $condition
+        string $condition
     ): bool {
         $start = microtime(true);
         $end = $start + $timeout / 1000.0;
@@ -803,7 +780,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function resizeWindow($width, $height, $name = null): void
+    public function resizeWindow(int $width, int $height, ?string $name = null): void
     {
         $this->withWindow(
             $name,
@@ -820,7 +797,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function submitForm(
         #[Language('XPath')]
-        $xpath
+        string $xpath
     ): void {
         $this->findElement($xpath)->submit();
     }
@@ -828,7 +805,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * {@inheritdoc}
      */
-    public function maximizeWindow($name = null): void
+    public function maximizeWindow(?string $name = null): void
     {
         $this->withWindow(
             $name,
@@ -975,7 +952,7 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * @see https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
      */
-    private function initCapabilities(array $desiredCapabilities = []): DesiredCapabilities
+    private function initCapabilities(array $desiredCapabilities): DesiredCapabilities
     {
         // Build base capabilities
         $browserName = $this->browserName;

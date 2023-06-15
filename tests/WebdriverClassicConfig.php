@@ -28,7 +28,7 @@ class WebdriverClassicConfig extends AbstractConfig
         $browser = getenv('WEB_FIXTURES_BROWSER') ?: null;
         $seleniumHost = $_SERVER['DRIVER_URL'];
 
-        return new WebdriverClassicDriver($browser, null, $seleniumHost);
+        return new WebdriverClassicDriver($browser, [], $seleniumHost);
     }
 
     public function mapRemoteFilePath($file): string
