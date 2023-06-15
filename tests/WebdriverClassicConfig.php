@@ -25,7 +25,7 @@ class WebdriverClassicConfig extends AbstractConfig
      */
     public function createDriver(): DriverInterface
     {
-        $browser = getenv('WEB_FIXTURES_BROWSER') ?: null;
+        $browser = getenv('WEB_FIXTURES_BROWSER') ?: WebdriverClassicDriver::DEFAULT_BROWSER;
         $seleniumHost = $_SERVER['DRIVER_URL'];
 
         return new WebdriverClassicDriver($browser, [], $seleniumHost);

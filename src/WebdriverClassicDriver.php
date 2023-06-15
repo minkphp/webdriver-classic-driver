@@ -20,6 +20,7 @@ use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
+use Facebook\WebDriver\Remote\WebDriverBrowserType;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverDimension;
 use Facebook\WebDriver\WebDriverElement;
@@ -955,18 +956,12 @@ class WebdriverClassicDriver extends CoreDriver
     private function initCapabilities(array $desiredCapabilities): DesiredCapabilities
     {
         // Build base capabilities
-        $browserName = $this->browserName;
-        if ($browserName && method_exists(DesiredCapabilities::class, $browserName)) {
-            /** @var DesiredCapabilities $caps */
-            $caps = DesiredCapabilities::$browserName();
-        } else {
-            $caps = new DesiredCapabilities();
-        }
+        $caps = $this->getBrowserSpecificCapabilities() ?? new DesiredCapabilities();
 
         // Set defaults
         $defaults = array_merge(
             self::DEFAULT_CAPABILITIES['default'],
-            self::DEFAULT_CAPABILITIES[$browserName] ?? []
+            self::DEFAULT_CAPABILITIES[$this->browserName] ?? []
         );
         foreach ($defaults as $key => $value) {
             if (is_null($caps->getCapability($key))) {
@@ -980,6 +975,53 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         return $caps;
+    }
+
+    private function getBrowserSpecificCapabilities(): ?DesiredCapabilities
+    {
+        switch ($this->browserName) {
+            case WebDriverBrowserType::FIREFOX:
+                return DesiredCapabilities::firefox();
+
+            case WebDriverBrowserType::CHROME:
+            case WebDriverBrowserType::GOOGLECHROME:
+                return DesiredCapabilities::chrome();
+
+            case WebDriverBrowserType::SAFARI:
+                return DesiredCapabilities::safari();
+
+            case WebDriverBrowserType::OPERA:
+                return DesiredCapabilities::opera();
+
+            case WebDriverBrowserType::MICROSOFT_EDGE:
+                return DesiredCapabilities::microsoftEdge();
+
+            case WebDriverBrowserType::IE:
+            case WebDriverBrowserType::IEXPLORE:
+                return DesiredCapabilities::internetExplorer();
+
+            case WebDriverBrowserType::ANDROID:
+                return DesiredCapabilities::android();
+
+            case WebDriverBrowserType::HTMLUNIT:
+                return DesiredCapabilities::htmlUnit();
+
+            case WebDriverBrowserType::IPHONE:
+                return DesiredCapabilities::iphone();
+
+            case WebDriverBrowserType::IPAD:
+                return DesiredCapabilities::ipad();
+
+            case WebDriverBrowserType::FIREFOX_PROXY:
+            case WebDriverBrowserType::FIREFOX_CHROME:
+            case WebDriverBrowserType::SAFARI_PROXY:
+            case WebDriverBrowserType::IEXPLORE_PROXY:
+            case WebDriverBrowserType::KONQUEROR:
+            case WebDriverBrowserType::MOCK:
+            case WebDriverBrowserType::IE_HTA:
+            default:
+                return null;
+        }
     }
 
     /**
