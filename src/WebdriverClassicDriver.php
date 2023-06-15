@@ -79,9 +79,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     // <editor-fold desc="Implementation">
 
-    /**
-     * {@inheritdoc}
-     */
     public function start(): void
     {
         if ($this->isStarted()) {
@@ -97,17 +94,11 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isStarted(): bool
     {
         return $this->webDriver !== null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function stop(): void
     {
         if (!$this->webDriver) {
@@ -140,49 +131,31 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->manage()->deleteAllCookies();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function visit(string $url): void
     {
         $this->getWebDriver()->navigate()->to($url);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCurrentUrl(): string
     {
         return $this->getWebDriver()->getCurrentURL();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function reload(): void
     {
         $this->getWebDriver()->navigate()->refresh();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function forward(): void
     {
         $this->getWebDriver()->navigate()->forward();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function back(): void
     {
         $this->getWebDriver()->navigate()->back();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function switchToWindow(?string $name = null): void
     {
         if ($name === null) {
@@ -196,9 +169,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->switchTo()->window((string)$name);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function switchToIFrame(?string $name = null): void
     {
         $frameQuery = $name;
@@ -213,9 +183,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->switchTo()->frame($frameQuery);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setCookie(string $name, ?string $value = null): void
     {
         if (null === $value) {
@@ -233,9 +200,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->manage()->addCookie($cookieArray);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getCookie(string $name): ?string
     {
         try {
@@ -250,25 +214,16 @@ class WebdriverClassicDriver extends CoreDriver
         return rawurldecode($result->getValue());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getContent(): string
     {
         return $this->getWebDriver()->getPageSource();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getScreenshot(): string
     {
         return $this->getWebDriver()->takeScreenshot();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getWindowNames(): array
     {
         $origWindow = $this->getWebDriver()->getWindowHandle();
@@ -285,9 +240,6 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getWindowName(): string
     {
         $name = (string)$this->evaluateScript('window.name');
@@ -299,9 +251,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $name;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function findElementXpaths(
         #[Language('XPath')]
         string $xpath
@@ -316,9 +265,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $elements;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTagName(
         #[Language('XPath')]
         string $xpath
@@ -326,9 +272,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->findElement($xpath)->getTagName();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getText(
         #[Language('XPath')]
         string $xpath
@@ -336,9 +279,6 @@ class WebdriverClassicDriver extends CoreDriver
         return str_replace(["\r", "\n"], ' ', $this->findElement($xpath)->getText());
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getHtml(
         #[Language('XPath')]
         string $xpath
@@ -346,9 +286,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->executeJsOnXpath($xpath, 'return arguments[0].innerHTML;');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getOuterHtml(
         #[Language('XPath')]
         string $xpath
@@ -356,9 +293,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->executeJsOnXpath($xpath, 'return arguments[0].outerHTML;');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getAttribute(
         #[Language('XPath')]
         string $xpath,
@@ -370,9 +304,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->executeJsOnXpath($xpath, $script);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getValue(
         #[Language('XPath')]
         string $xpath
@@ -414,9 +345,6 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setValue(
         #[Language('XPath')]
         string $xpath,
@@ -513,9 +441,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->trigger($xpath, 'blur');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function check(
         #[Language('XPath')]
         string $xpath
@@ -530,9 +455,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->clickOnElement($element);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function uncheck(
         #[Language('XPath')]
         string $xpath
@@ -547,9 +469,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->clickOnElement($element);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isChecked(
         #[Language('XPath')]
         string $xpath
@@ -557,9 +476,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->findElement($xpath)->isSelected();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function selectOption(
         #[Language('XPath')]
         string $xpath,
@@ -583,9 +499,6 @@ class WebdriverClassicDriver extends CoreDriver
         throw new DriverException(sprintf($message, $xpath));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isSelected(
         #[Language('XPath')]
         string $xpath
@@ -593,9 +506,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->findElement($xpath)->isSelected();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function click(
         #[Language('XPath')]
         string $xpath
@@ -603,9 +513,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->clickOnElement($this->findElement($xpath));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function doubleClick(
         #[Language('XPath')]
         string $xpath
@@ -613,9 +520,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->doubleClickOnElement($this->findElement($xpath));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function rightClick(
         #[Language('XPath')]
         string $xpath
@@ -623,9 +527,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->rightClickOnElement($this->findElement($xpath));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function attachFile(
         #[Language('XPath')]
         string $xpath,
@@ -637,9 +538,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->setValue($xpath, $path);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isVisible(
         #[Language('XPath')]
         string $xpath
@@ -647,9 +545,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->findElement($xpath)->isDisplayed();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function mouseOver(
         #[Language('XPath')]
         string $xpath
@@ -657,9 +552,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->mouseOverElement($this->findElement($xpath));
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function focus(
         #[Language('XPath')]
         string $xpath
@@ -667,9 +559,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->trigger($xpath, 'focus');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function blur(
         #[Language('XPath')]
         string $xpath
@@ -677,9 +566,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->trigger($xpath, 'blur');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function keyPress(
         #[Language('XPath')]
         string $xpath,
@@ -690,9 +576,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->trigger($xpath, 'keypress', $options);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function keyDown(
         #[Language('XPath')]
         string $xpath,
@@ -703,9 +586,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->trigger($xpath, 'keydown', $options);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function keyUp(
         #[Language('XPath')]
         string $xpath,
@@ -716,9 +596,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->trigger($xpath, 'keyup', $options);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function dragTo(
         #[Language('XPath')]
         string $sourceXpath,
@@ -730,9 +607,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->action()->dragAndDrop($source, $destination)->perform();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function executeScript(
         #[Language('JavaScript')]
         string $script
@@ -759,9 +633,6 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->getWebDriver()->executeScript($script);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function wait(
         int $timeout,
         #[Language('JavaScript')]
@@ -778,9 +649,6 @@ class WebdriverClassicDriver extends CoreDriver
         return (bool)$result;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function resizeWindow(int $width, int $height, ?string $name = null): void
     {
         $this->withWindow(
@@ -793,9 +661,6 @@ class WebdriverClassicDriver extends CoreDriver
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function submitForm(
         #[Language('XPath')]
         string $xpath
@@ -803,9 +668,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->findElement($xpath)->submit();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function maximizeWindow(?string $name = null): void
     {
         $this->withWindow(
