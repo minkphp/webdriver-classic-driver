@@ -20,7 +20,6 @@ class WebdriverClassicConfig extends AbstractConfig
     }
 
     /**
-     * {@inheritdoc}
      * @throws DriverException
      */
     public function createDriver(): DriverInterface

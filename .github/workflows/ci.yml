@@ -91,7 +91,7 @@ jobs:
 
       - name: Archive logs artifacts
         uses: actions/upload-artifact@v3
-        if: always()
+        if: ${{ failure() }}
         with:
           name: logs_php-${{ matrix.php }}_selenium-${{ matrix.selenium }}_${{ matrix.browser }}
           path: logs

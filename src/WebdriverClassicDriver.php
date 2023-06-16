@@ -87,7 +87,7 @@ class WebdriverClassicDriver extends CoreDriver
         string $webDriverHost = 'http://localhost:4444/wd/hub'
     ) {
         $this->browserName = $browserName;
-        $this->desiredCapabilities=$this->initCapabilities($desiredCapabilities);
+        $this->desiredCapabilities = $this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
     }
 
