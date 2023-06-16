@@ -41,12 +41,26 @@ class WebdriverClassicDriver extends CoreDriver
             'deviceOrientation' => 'landscape',
             'deviceType' => 'desktop',
         ],
+
         'chrome' => [
             'goog:chromeOptions' => [
+                // disable "Chrome is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
             ],
         ],
+
         'firefox' => [
+        ],
+
+        'edge' => [
+            'ms:edgeOptions' => [
+                // disable "Microsoft Edge is being controlled.." notification bar
+                'excludeSwitches' => ['enable-automation'],
+                // disable menu shown when text is selected (which interferes with double-clicking)
+                'prefs' => [
+                    'edge_quick_search.show_mini_menu' => false,
+                ],
+            ],
         ],
     ];
 
