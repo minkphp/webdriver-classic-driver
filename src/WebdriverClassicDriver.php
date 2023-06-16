@@ -87,7 +87,7 @@ class WebdriverClassicDriver extends CoreDriver
         string $webDriverHost = 'http://localhost:4444/wd/hub'
     ) {
         $this->browserName = $browserName;
-        $this->setDesiredCapabilities($this->initCapabilities($desiredCapabilities));
+        $this->desiredCapabilities=$this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
     }
 
@@ -723,30 +723,6 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * Sets the desired capabilities - called on construction.
-     *
-     * @see http://code.google.com/p/selenium/wiki/DesiredCapabilities
-     *
-     * @api
-     * @param array|DesiredCapabilities $desiredCapabilities
-     * @throws DriverException
-     */
-    public function setDesiredCapabilities($desiredCapabilities): self
-    {
-        if ($this->isStarted()) {
-            throw new DriverException('Unable to set desiredCapabilities, the session has already started');
-        }
-
-        if (is_array($desiredCapabilities)) {
-            $desiredCapabilities = new DesiredCapabilities($desiredCapabilities);
-        }
-
-        $this->desiredCapabilities = $desiredCapabilities;
-
-        return $this;
-    }
-
-    /**
      * Sets the timeouts to apply to the webdriver session
      *
      * @param array $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
@@ -760,18 +736,6 @@ class WebdriverClassicDriver extends CoreDriver
         if ($this->isStarted()) {
             $this->applyTimeouts();
         }
-    }
-
-    /**
-     * Gets the final desired capabilities (as sent to Selenium).
-     *
-     * @see http://code.google.com/p/selenium/wiki/DesiredCapabilities
-     *
-     * @api
-     */
-    public function getDesiredCapabilities(): array
-    {
-        return $this->desiredCapabilities->toArray();
     }
 
     /**
