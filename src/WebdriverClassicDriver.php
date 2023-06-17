@@ -323,13 +323,14 @@ class WebdriverClassicDriver extends CoreDriver
         string $xpath
     ) {
         $element = $this->findElement($xpath);
-        $elementName = strtolower($element->getTagName() ?? '');
-        $elementType = strtolower((string)$element->getAttribute('type'));
-        $widgetType = $elementName === 'input' ? $elementType : $elementName;
+        $widgetType = strtolower($element->getTagName() ?? '');
+        if ($widgetType === 'input') {
+            $widgetType = strtolower((string)$element->getAttribute('type'));
+        }
 
         try {
-            switch (true) {
-                case $widgetType === 'radio':
+            switch ($widgetType) {
+                case 'radio':
                     $radioElement = new WebDriverRadios($element);
                     try {
                         return $radioElement->getFirstSelectedOption()->getAttribute('value');
@@ -337,11 +338,11 @@ class WebdriverClassicDriver extends CoreDriver
                         return null;
                     }
 
-                case $widgetType === 'checkbox':
+                case 'checkbox':
                     // WebDriverCheckboxes is not suitable since it _always_ behaves as a group
                     return $element->isSelected() ? $element->getAttribute('value') : null;
 
-                case $widgetType === 'select':
+                case 'select':
                     $selectElement = new WebDriverSelect($element);
                     $selectedOptions = array_map(
                         static fn(WebDriverElement $option) => $option->getAttribute('value'),
@@ -365,91 +366,83 @@ class WebdriverClassicDriver extends CoreDriver
         $value
     ): void {
         $element = $this->findElement($xpath);
-        $elementName = strtolower($element->getTagName() ?? '');
+        $widgetType = strtolower($element->getTagName() ?? '');
+        if ($widgetType === 'input') {
+            $widgetType = strtolower((string)$element->getAttribute('type'));
+        }
 
-        switch ($elementName) {
-            case 'textarea':
-                if (!is_string($value)) {
-                    throw new DriverException('Textarea value must be a string');
-                }
-                $element->clear();
-                $element->sendKeys($value);
-                break;
-
-            case 'select':
-                if (is_array($value)) {
-                    $this->deselectAllOptions($element);
-                    foreach ($value as $option) {
-                        $this->selectOptionOnElement($element, $option, true);
-                    }
-                    return;
-                }
-                $this->selectOptionOnElement($element, (string)$value);
-                return;
-
-            case 'input':
-                $elementType = strtolower((string)$element->getAttribute('type'));
-                switch ($elementType) {
-                    case 'submit':
-                    case 'image':
-                    case 'button':
-                    case 'reset':
-                        $message = 'Cannot set value on element with XPath "%s" as it is not a select, textarea or textbox';
-                        throw new DriverException(sprintf($message, $xpath));
-
-                    case 'color':
-                        if (!is_string($value)) {
-                            throw new DriverException('Color value must be a string');
+        try {
+            switch ($widgetType) {
+                case 'select':
+                    if (is_array($value)) {
+                        $this->deselectAllOptions($element);
+                        foreach ($value as $option) {
+                            $this->selectOptionOnElement($element, $option, true);
                         }
-                        // one cannot simply type into a color field, nor clear it
+                        return;
+                    }
+                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->selectOptionOnElement($element, $value);
+                    return;
+
+                case 'submit':
+                case 'image':
+                case 'button':
+                case 'reset':
+                    $message = 'Cannot set value on element with XPath "%s" as it is not a select, textarea or textbox';
+                    throw new DriverException(sprintf($message, $xpath));
+
+                case 'color':
+                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    // one cannot simply type into a color field, nor clear it
+                    $this->executeJsOnElement(
+                        $element,
+                        'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
+                    );
+                    break;
+
+                case 'date':
+                case 'time':
+                    try {
+                        $element->clear();
+                        $element->sendKeys($value);
+                    } catch (WebDriverException $ex) {
+                        // fix for Selenium 2 compatibility, since it's not able to clear these specific fields
                         $this->executeJsOnElement(
                             $element,
                             'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
                         );
-                        break;
+                    }
+                    break;
 
-                    case 'date':
-                    case 'time':
-                        try {
-                            $element->clear();
-                            $element->sendKeys($value);
-                        } catch (WebDriverException $ex) {
-                            // fix for Selenium 2 compatibility, since it's not able to clear these specific fields
-                            $this->executeJsOnElement(
-                                $element,
-                                'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
-                            );
-                        }
-                        break;
+                case 'checkbox':
+                    is_bool($value) or throw new DriverException("Value for $widgetType must be a boolean");
+                    if ($element->isSelected() xor $value) {
+                        $this->clickOnElement($element);
+                    }
+                    return;
 
-                    case 'checkbox':
-                        if ($element->isSelected() xor $value) {
-                            $this->clickOnElement($element);
-                        }
-                        return;
+                case 'radio':
+                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->selectRadioValue($element, $value);
+                    return;
 
-                    case 'radio':
-                        if (!is_string($value)) {
-                            throw new DriverException('Value must be a string');
-                        }
-                        $this->selectRadioValue($element, $value);
-                        return;
+                case 'file':
+                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $element->sendKeys($value);
+                    break;
 
-                    case 'file':
-                        if (!is_string($value)) {
-                            throw new DriverException('Value must be a string');
-                        }
-                        $element->sendKeys($value);
-                        break;
-
-                    default:
-                        if (!is_string($value)) {
-                            throw new DriverException('Value must be a string');
-                        }
-                        $element->clear();
-                        $element->sendKeys($value);
-                        break;
-                }
+                case 'text':
+                case 'password':
+                case 'textarea':
+                default:
+                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $element->clear();
+                    $element->sendKeys($value);
+                    break;
+            }
+        } catch (Throwable $e) {
+            throw new DriverException("Cannot retrieve $widgetType value: {$e->getMessage()}", 0, $e);
         }
 
         $this->trigger($xpath, 'blur');
