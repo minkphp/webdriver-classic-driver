@@ -310,8 +310,11 @@ class WebdriverClassicDriver extends CoreDriver
         string $xpath,
         string $name
     ): ?string {
-        $result = $this->findElement($xpath)->getAttribute($name);
-        return $result === true ? '' : $result;
+        // W3C spec deviates from expected behavior, (e.g. returns empty string instead of null for missing property),
+        // so we cannot use webdriver api for this. See also: https://w3c.github.io/webdriver/#dfn-get-element-attribute
+        $escapedName = $this->jsonEncode($name, 'get attribute', 'attribute name');
+        $script = "return arguments[0].getAttribute($escapedName)";
+        return $this->executeJsOnXpath($xpath, $script);
     }
 
     public function getValue(
