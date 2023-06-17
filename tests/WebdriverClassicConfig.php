@@ -19,9 +19,6 @@ class WebdriverClassicConfig extends AbstractConfig
         return new self();
     }
 
-    /**
-     * @throws DriverException
-     */
     public function createDriver(): DriverInterface
     {
         $browser = getenv('WEB_FIXTURES_BROWSER') ?: WebdriverClassicDriver::DEFAULT_BROWSER;

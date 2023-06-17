@@ -16,6 +16,7 @@ use Behat\Mink\Driver\CoreDriver;
 use Behat\Mink\Exception\DriverException;
 use Facebook\WebDriver\Exception\NoSuchCookieException;
 use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\UnsupportedOperationException;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
@@ -78,9 +79,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     private ?string $initialWindowName = null;
 
-    /**
-     * @throws DriverException
-     */
     public function __construct(
         string $browserName = self::DEFAULT_BROWSER,
         array $desiredCapabilities = [],
@@ -297,14 +295,14 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->executeJsOnXpath($xpath, 'return arguments[0].innerHTML;');
+        return $this->getElementDomProperty($this->findElement($xpath), 'innerHTML');
     }
 
     public function getOuterHtml(
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->executeJsOnXpath($xpath, 'return arguments[0].outerHTML;');
+        return $this->getElementDomProperty($this->findElement($xpath), 'outerHTML');
     }
 
     public function getAttribute(
@@ -312,10 +310,8 @@ class WebdriverClassicDriver extends CoreDriver
         string $xpath,
         string $name
     ): ?string {
-        $escapedName = $this->jsonEncode($name, 'get attribute', 'attribute name');
-        $script = "return arguments[0].getAttribute($escapedName)";
-
-        return $this->executeJsOnXpath($xpath, $script);
+        $result = $this->findElement($xpath)->getAttribute($name);
+        return $result === true ? '' : $result;
     }
 
     public function getValue(
@@ -351,9 +347,7 @@ class WebdriverClassicDriver extends CoreDriver
                     return $selectElement->isMultiple() ? $selectedOptions : ($selectedOptions[0] ?? '');
 
                 default:
-                    return $this->getWebDriver()->isW3cCompliant()
-                        ? $element->getDomProperty('value')
-                        : $this->executeJsOnElement($element, 'return arguments[0].value');
+                    return $this->getElementDomProperty($element, 'value');
             }
         } catch (Throwable $e) {
             throw new DriverException("Cannot retrieve $widgetType value: {$e->getMessage()}", 0, $e);
@@ -381,7 +375,7 @@ class WebdriverClassicDriver extends CoreDriver
                         }
                         return;
                     }
-                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->assertString($value, "Value for $widgetType must be a string");
                     $this->selectOptionOnElement($element, $value);
                     return;
 
@@ -393,12 +387,9 @@ class WebdriverClassicDriver extends CoreDriver
                     throw new DriverException(sprintf($message, $xpath));
 
                 case 'color':
-                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->assertString($value, "Value for $widgetType must be a string");
                     // one cannot simply type into a color field, nor clear it
-                    $this->executeJsOnElement(
-                        $element,
-                        'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
-                    );
+                    $this->setElementDomProperty($element, 'value', $value);
                     break;
 
                 case 'date':
@@ -407,28 +398,25 @@ class WebdriverClassicDriver extends CoreDriver
                         $element->clear();
                         $element->sendKeys($value);
                     } catch (WebDriverException $ex) {
-                        // fix for Selenium 2 compatibility, since it's not able to clear these specific fields
-                        $this->executeJsOnElement(
-                            $element,
-                            'arguments[0].value = ' . $this->jsonEncode($value, 'set value', 'value')
-                        );
+                        // fix for Selenium 2 compatibility, since it's not able to clear or set these specific fields
+                        $this->setElementDomProperty($element, 'value', $value);
                     }
                     break;
 
                 case 'checkbox':
-                    is_bool($value) or throw new DriverException("Value for $widgetType must be a boolean");
+                    $this->assertBool($value, "Value for $widgetType must be a boolean");
                     if ($element->isSelected() xor $value) {
                         $this->clickOnElement($element);
                     }
                     return;
 
                 case 'radio':
-                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->assertString($value, "Value for $widgetType must be a string");
                     $this->selectRadioValue($element, $value);
                     return;
 
                 case 'file':
-                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->assertString($value, "Value for $widgetType must be a string");
                     $element->sendKeys($value);
                     break;
 
@@ -436,7 +424,7 @@ class WebdriverClassicDriver extends CoreDriver
                 case 'password':
                 case 'textarea':
                 default:
-                    is_string($value) or throw new DriverException("Value for $widgetType must be a string");
+                    $this->assertString($value, "Value for $widgetType must be a string");
                     $element->clear();
                     $element->sendKeys($value);
                     break;
@@ -1056,7 +1044,7 @@ class WebdriverClassicDriver extends CoreDriver
     private function findElement(
         #[Language('XPath')]
         string $xpath,
-        RemoteWebElement $parent = null
+        ?RemoteWebElement $parent = null
     ): RemoteWebElement {
         try {
             $finder = WebDriverBy::xpath($xpath);
@@ -1173,6 +1161,64 @@ class WebdriverClassicDriver extends CoreDriver
             return json_encode($value, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             throw new DriverException("Cannot $action, $field not serializable: {$e->getMessage()}", 0, $e);
+        }
+    }
+
+    /**
+     * @param mixed $value
+     * @throws DriverException
+     * @phpstan-assert string $value
+     * @todo When switching to PHP 8, this can be replaced with `is_string(..) or throw new DriverException(..);`
+     */
+    private function assertString($value, string $message): void
+    {
+        if (!is_string($value)) {
+            throw new DriverException($message);
+        }
+    }
+
+    /**
+     * @param mixed $value
+     * @throws DriverException
+     * @phpstan-assert bool $value
+     * @todo When switching to PHP 8, this can be replaced with `is_bool(..) or throw new DriverException(..);`
+     */
+    private function assertBool($value, string $message): void
+    {
+        if (!is_bool($value)) {
+            throw new DriverException($message);
+        }
+    }
+
+    /**
+     * @param mixed $value
+     * @throws DriverException
+     */
+    private function setElementDomProperty(RemoteWebElement $element, string $property, $value): void
+    {
+        $this->executeJsOnElement(
+            $element,
+            "arguments[0]['$property'] = {$this->jsonEncode($value, "set $property", $property)}"
+        );
+    }
+
+    /**
+     * @return mixed
+     * @throws DriverException
+     */
+    private function getElementDomProperty(RemoteWebElement $element, string $property)
+    {
+        try {
+            return $this->getWebDriver()->isW3cCompliant()
+                ? $element->getDomProperty($property)
+                : $this->executeJsOnElement($element, "return arguments[0]['$property']");
+        } catch (UnsupportedOperationException $e) {
+            $message = sprintf(
+                'Could not get value of property "%s": %s',
+                $property,
+                $e->getMessage()
+            );
+            throw new DriverException($message, 0, $e);
         }
     }
 
