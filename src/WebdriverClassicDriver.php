@@ -722,40 +722,6 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    /**
-     * Globally press a key i.e. not typing into an element.
-     *
-     * @throws DriverException
-     * @api
-     */
-    public function globalKeyPress(string $char, ?string $modifier = null): void
-    {
-        $keyboard = $this->getWebDriver()->getKeyboard();
-        if ($modifier) {
-            $keyboard->pressKey($modifier);
-        }
-        $keyboard->pressKey($char);
-        if ($modifier) {
-            $keyboard->releaseKey($modifier);
-        }
-    }
-
-    /**
-     * Drag and drop an element by x,y pixels.
-     *
-     * @throws DriverException
-     * @api
-     */
-    public function dragBy(
-        #[Language('XPath')]
-        string $sourceXpath,
-        int $xOffset,
-        int $yOffset
-    ): void {
-        $source = $this->findElement($sourceXpath);
-        $this->getWebDriver()->action()->dragAndDropBy($source, $xOffset, $yOffset)->perform();
-    }
-
     // </editor-fold>
 
     // <editor-fold desc="Private Utilities">
