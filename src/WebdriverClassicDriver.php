@@ -6,8 +6,6 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
- *
- * @noinspection PhpLanguageLevelInspection
  */
 
 namespace Mink\WebdriverClassDriver;
@@ -119,9 +117,10 @@ class WebdriverClassicDriver extends CoreDriver
 
         try {
             $this->getWebDriver()->quit();
-            $this->webDriver = null;
         } catch (Throwable $e) {
             throw new DriverException('Could not close connection', 0, $e);
+        } finally {
+            $this->webDriver = null;
         }
     }
 
