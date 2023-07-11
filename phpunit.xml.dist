@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         colors="true"
-         bootstrap="vendor/autoload.php"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd">
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         beStrictAboutOutputDuringTests="true"
+         colors="true">
     <coverage>
         <include>
             <directory>./src</directory>
@@ -18,15 +19,18 @@
 
     <php>
         <var name="driver_config_factory" value="Mink\WebdriverClassDriver\Tests\WebdriverClassicConfig::getInstance"/>
-        <!--server name="WEB_FIXTURES_HOST" value="http://test.mink.dev" /-->
+
+        <server name="WEB_FIXTURES_HOST" value="http://host.docker.internal:8002"/>
         <!-- MacOS -->
         <!--<server name="WEB_FIXTURES_HOST" value="http://docker.for.mac.localhost:8002"/>-->
-        <!--<server name="WEB_FIXTURES_BROWSER" value="firefox"/>-->
+
         <!-- where driver will connect to -->
         <server name="DRIVER_URL" value="http://localhost:4444/wd/hub"/>
+
         <!-- where DocumentRoot of 'Test Machine' is mounted to on 'Driver Machine' (only if these are 2 different machines) -->
-        <!--server name="DRIVER_MACHINE_BASE_PATH" value="" /-->
-        <!--server name="TEST_MACHINE_BASE_PATH" value="" /-->
+        <server name="DRIVER_MACHINE_BASE_PATH" value="/fixtures/"/>
+
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
     </php>
 
     <listeners>
