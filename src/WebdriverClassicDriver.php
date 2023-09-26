@@ -20,9 +20,11 @@ use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\Remote\WebDriverBrowserType;
+use Facebook\WebDriver\Remote\WebDriverCapabilityType;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverDimension;
 use Facebook\WebDriver\WebDriverElement;
+use Facebook\WebDriver\WebDriverPlatform;
 use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
@@ -31,7 +33,7 @@ use Throwable;
 
 class WebdriverClassicDriver extends CoreDriver
 {
-    public const DEFAULT_BROWSER = 'chrome';
+    public const DEFAULT_BROWSER = WebDriverBrowserType::CHROME;
 
     public const DEFAULT_CAPABILITIES = [
         'default' => [
@@ -41,17 +43,14 @@ class WebdriverClassicDriver extends CoreDriver
             'deviceType' => 'desktop',
         ],
 
-        'chrome' => [
+        WebDriverBrowserType::CHROME => [
             'goog:chromeOptions' => [
                 // disable "Chrome is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
             ],
         ],
 
-        'firefox' => [
-        ],
-
-        'edge' => [
+        WebDriverBrowserType::MICROSOFT_EDGE => [
             'ms:edgeOptions' => [
                 // disable "Microsoft Edge is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
@@ -61,6 +60,12 @@ class WebdriverClassicDriver extends CoreDriver
                 ],
             ],
         ],
+    ];
+
+    private const BROWSER_NAME_ALIAS_MAP = [
+        'edge' => WebDriverBrowserType::MICROSOFT_EDGE,
+        'chrome' => WebDriverBrowserType::CHROME,
+        'firefox' => WebDriverBrowserType::FIREFOX,
     ];
 
     private const W3C_WINDOW_HANDLE_PREFIX = 'w3cwh:';
@@ -77,12 +82,15 @@ class WebdriverClassicDriver extends CoreDriver
 
     private ?string $initialWindowName = null;
 
+    /**
+     * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
+     */
     public function __construct(
         string $browserName = self::DEFAULT_BROWSER,
         array $desiredCapabilities = [],
         string $webDriverHost = 'http://localhost:4444/wd/hub'
     ) {
-        $this->browserName = $browserName;
+        $this->browserName = self::BROWSER_NAME_ALIAS_MAP[$browserName];
         $this->desiredCapabilities = $this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
     }
@@ -754,7 +762,7 @@ class WebdriverClassicDriver extends CoreDriver
             self::DEFAULT_CAPABILITIES[$this->browserName] ?? []
         );
         foreach ($defaults as $key => $value) {
-            if (is_null($caps->getCapability($key))) {
+            if ($caps->getCapability($key) === null) {
                 $caps->setCapability($key, $value);
             }
         }
@@ -784,7 +792,8 @@ class WebdriverClassicDriver extends CoreDriver
                 return DesiredCapabilities::opera();
 
             case WebDriverBrowserType::MICROSOFT_EDGE:
-                return DesiredCapabilities::microsoftEdge();
+                return DesiredCapabilities::microsoftEdge()
+                    ->setCapability(WebDriverCapabilityType::PLATFORM, WebDriverPlatform::ANY);
 
             case WebDriverBrowserType::IE:
             case WebDriverBrowserType::IEXPLORE:
