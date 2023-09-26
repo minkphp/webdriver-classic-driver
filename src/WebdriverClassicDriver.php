@@ -396,6 +396,7 @@ class WebdriverClassicDriver extends CoreDriver
 
                 case 'date':
                 case 'time':
+                    $this->assertString($value, "Value for $widgetType must be a string");
                     try {
                         $element->clear();
                         $element->sendKeys($value);
