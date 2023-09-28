@@ -28,8 +28,6 @@ use Facebook\WebDriver\WebDriverPlatform;
 use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
-use JsonException;
-use Throwable;
 
 class WebdriverClassicDriver extends CoreDriver
 {
@@ -90,7 +88,7 @@ class WebdriverClassicDriver extends CoreDriver
         array $desiredCapabilities = [],
         string $webDriverHost = 'http://localhost:4444/wd/hub'
     ) {
-        $this->browserName = self::BROWSER_NAME_ALIAS_MAP[$browserName];
+        $this->browserName = self::BROWSER_NAME_ALIAS_MAP[$browserName] ?? $browserName;
         $this->desiredCapabilities = $this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
     }
@@ -107,7 +105,7 @@ class WebdriverClassicDriver extends CoreDriver
             $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
             $this->applyTimeouts();
             $this->initialWindowName = $this->getWindowName();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new DriverException("Could not start driver: {$e->getMessage()}", 0, $e);
         }
     }
@@ -125,7 +123,7 @@ class WebdriverClassicDriver extends CoreDriver
 
         try {
             $this->getWebDriver()->quit();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new DriverException('Could not close connection', 0, $e);
         } finally {
             $this->webDriver = null;
@@ -359,7 +357,7 @@ class WebdriverClassicDriver extends CoreDriver
                 default:
                     return $this->getElementDomProperty($element, 'value');
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new DriverException("Cannot retrieve $widgetType value: {$e->getMessage()}", 0, $e);
         }
     }
@@ -440,7 +438,7 @@ class WebdriverClassicDriver extends CoreDriver
                     $element->sendKeys($value);
                     break;
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new DriverException("Cannot retrieve $widgetType value: {$e->getMessage()}", 0, $e);
         }
 
@@ -930,7 +928,7 @@ class WebdriverClassicDriver extends CoreDriver
                         throw new DriverException("Invalid timeout type: $type");
                 }
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new DriverException("Error setting timeout: {$e->getMessage()}", 0, $e);
         }
     }
@@ -1029,7 +1027,7 @@ class WebdriverClassicDriver extends CoreDriver
             return $parent
                 ? $parent->findElement($finder)
                 : $this->getWebDriver()->findElement($finder);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
         }
     }
@@ -1041,7 +1039,7 @@ class WebdriverClassicDriver extends CoreDriver
     {
         try {
             (new WebDriverRadios($element))->selectByValue($value);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $message = sprintf(
                 'Cannot select radio button of group "%s" with value "%s": %s',
                 $element->getAttribute('name'),
@@ -1067,7 +1065,7 @@ class WebdriverClassicDriver extends CoreDriver
             } catch (NoSuchElementException $e) {
                 $select->selectByVisibleText($value);
             }
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $message = sprintf(
                 'Cannot select option "%s" of "%s": %s',
                 $value,
@@ -1089,7 +1087,7 @@ class WebdriverClassicDriver extends CoreDriver
     {
         try {
             (new WebDriverSelect($element))->deselectAll();
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $message = sprintf(
                 'Cannot deselect all options of "%s": %s',
                 $element->getAttribute('name'),
@@ -1137,7 +1135,7 @@ class WebdriverClassicDriver extends CoreDriver
     {
         try {
             return json_encode($value, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
+        } catch (\JsonException $e) {
             throw new DriverException("Cannot $action, $field not serializable: {$e->getMessage()}", 0, $e);
         }
     }
