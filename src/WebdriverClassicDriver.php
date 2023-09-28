@@ -383,7 +383,9 @@ class WebdriverClassicDriver extends CoreDriver
                         }
                         return;
                     }
-                    $this->assertString($value, "Value for $widgetType must be a string");
+                    if (!is_string($value)) {
+                        throw new DriverException("Value for $widgetType must be a string");
+                    }
                     $this->selectOptionOnElement($element, $value);
                     return;
 
@@ -395,14 +397,18 @@ class WebdriverClassicDriver extends CoreDriver
                     throw new DriverException(sprintf($message, $xpath));
 
                 case 'color':
-                    $this->assertString($value, "Value for $widgetType must be a string");
+                    if (!is_string($value)) {
+                        throw new DriverException("Value for $widgetType must be a string");
+                    }
                     // one cannot simply type into a color field, nor clear it
                     $this->setElementDomProperty($element, 'value', $value);
                     break;
 
                 case 'date':
                 case 'time':
-                    $this->assertString($value, "Value for $widgetType must be a string");
+                    if (!is_string($value)) {
+                        throw new DriverException("Value for $widgetType must be a string");
+                    }
                     try {
                         $element->clear();
                         $element->sendKeys($value);
@@ -413,19 +419,25 @@ class WebdriverClassicDriver extends CoreDriver
                     break;
 
                 case 'checkbox':
-                    $this->assertBool($value, "Value for $widgetType must be a boolean");
+                    if (!is_bool($value)) {
+                        throw new DriverException("Value for $widgetType must be a boolean");
+                    }
                     if ($element->isSelected() xor $value) {
                         $this->clickOnElement($element);
                     }
                     return;
 
                 case 'radio':
-                    $this->assertString($value, "Value for $widgetType must be a string");
+                    if (!is_string($value)) {
+                        throw new DriverException("Value for $widgetType must be a string");
+                    }
                     $this->selectRadioValue($element, $value);
                     return;
 
                 case 'file':
-                    $this->assertString($value, "Value for $widgetType must be a string");
+                    if (!is_string($value)) {
+                        throw new DriverException("Value for $widgetType must be a string");
+                    }
                     $element->sendKeys($value);
                     break;
 
@@ -433,7 +445,9 @@ class WebdriverClassicDriver extends CoreDriver
                 case 'password':
                 case 'textarea':
                 default:
-                    $this->assertString($value, "Value for $widgetType must be a string");
+                    if (!is_string($value)) {
+                        throw new DriverException("Value for $widgetType must be a string");
+                    }
                     $element->clear();
                     $element->sendKeys($value);
                     break;
@@ -1137,32 +1151,6 @@ class WebdriverClassicDriver extends CoreDriver
             return json_encode($value, JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
             throw new DriverException("Cannot $action, $field not serializable: {$e->getMessage()}", 0, $e);
-        }
-    }
-
-    /**
-     * @param mixed $value
-     * @throws DriverException
-     * @phpstan-assert string $value
-     * @todo When switching to PHP 8, this can be replaced with `is_string(..) or throw new DriverException(..);`
-     */
-    private function assertString($value, string $message): void
-    {
-        if (!is_string($value)) {
-            throw new DriverException($message);
-        }
-    }
-
-    /**
-     * @param mixed $value
-     * @throws DriverException
-     * @phpstan-assert bool $value
-     * @todo When switching to PHP 8, this can be replaced with `is_bool(..) or throw new DriverException(..);`
-     */
-    private function assertBool($value, string $message): void
-    {
-        if (!is_bool($value)) {
-            throw new DriverException($message);
         }
     }
 
