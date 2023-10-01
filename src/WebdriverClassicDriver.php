@@ -455,8 +455,6 @@ class WebdriverClassicDriver extends CoreDriver
         } catch (\Throwable $e) {
             throw new DriverException("Cannot set $widgetType value: {$e->getMessage()}", 0, $e);
         }
-
-        $this->trigger($xpath, 'blur');
     }
 
     public function check(
@@ -568,50 +566,6 @@ class WebdriverClassicDriver extends CoreDriver
         string $xpath
     ): void {
         $this->mouseOverElement($this->findElement($xpath));
-    }
-
-    public function focus(
-        #[Language('XPath')]
-        string $xpath
-    ): void {
-        $this->trigger($xpath, 'focus');
-    }
-
-    public function blur(
-        #[Language('XPath')]
-        string $xpath
-    ): void {
-        $this->trigger($xpath, 'blur');
-    }
-
-    public function keyPress(
-        #[Language('XPath')]
-        string $xpath,
-        $char,
-        ?string $modifier = null
-    ): void {
-        $options = $this->charToSynOptions($char, $modifier);
-        $this->trigger($xpath, 'keypress', $options);
-    }
-
-    public function keyDown(
-        #[Language('XPath')]
-        string $xpath,
-        $char,
-        ?string $modifier = null
-    ): void {
-        $options = $this->charToSynOptions($char, $modifier);
-        $this->trigger($xpath, 'keydown', $options);
-    }
-
-    public function keyUp(
-        #[Language('XPath')]
-        string $xpath,
-        $char,
-        ?string $modifier = null
-    ): void {
-        $options = $this->charToSynOptions($char, $modifier);
-        $this->trigger($xpath, 'keyup', $options);
     }
 
     public function dragTo(
@@ -833,54 +787,6 @@ class WebdriverClassicDriver extends CoreDriver
             default:
                 return null;
         }
-    }
-
-    /**
-     * @throws DriverException
-     */
-    private function withSyn(): self
-    {
-        $hasSyn = $this->evaluateScript(
-            'return window.syn !== undefined && window.syn.trigger !== undefined'
-        );
-        if ($hasSyn) {
-            return $this;
-        }
-
-        $synJs = file_get_contents(__DIR__ . '/../resources/syn.js');
-        if (!$synJs) {
-            throw new DriverException('Could not load syn.js resource');
-        }
-
-        $this->getWebDriver()->executeScript($synJs);
-        return $this;
-    }
-
-    /**
-     * @param int|string $char
-     * @throws DriverException
-     */
-    private function charToSynOptions($char, ?string $modifier = null): string
-    {
-        if (is_int($char)) {
-            $charCode = $char;
-            $char = chr($charCode);
-        } else {
-            $charCode = ord($char);
-        }
-
-        $options = [
-            'key' => $char,
-            'which' => $charCode,
-            'charCode' => $charCode,
-            'keyCode' => $charCode,
-        ];
-
-        if ($modifier) {
-            $options[$modifier . 'Key'] = true;
-        }
-
-        return $this->jsonEncode($options, 'build Syn payload', 'options');
     }
 
     /**
@@ -1126,19 +1032,6 @@ class WebdriverClassicDriver extends CoreDriver
                 "Impossible to $action the element with XPath \"$xpath\" as it is not a $type input"
             );
         }
-    }
-
-    /**
-     * @throws DriverException
-     */
-    private function trigger(
-        #[Language('XPath')]
-        string $xpath,
-        string $event,
-        #[Language('JSON')]
-        string $options = '{}'
-    ): void {
-        $this->withSyn()->executeJsOnXpath($xpath, "window.syn.trigger(arguments[0], '$event', $options)");
     }
 
     /**
