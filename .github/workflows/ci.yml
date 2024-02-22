@@ -86,6 +86,7 @@ jobs:
         # See https://github.com/nektos/act#skipping-steps
         if: ${{ !env.ACT }}
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
 
       - name: Extract docker logs
