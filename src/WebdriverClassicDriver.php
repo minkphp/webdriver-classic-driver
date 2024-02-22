@@ -189,7 +189,7 @@ class WebdriverClassicDriver extends CoreDriver
     public function switchToIFrame($name = null): void
     {
         $frameQuery = $name;
-        if ($name && !is_numeric($name) && $this->getWebDriver()->isW3cCompliant()) {
+        if ($name && !is_int($name) && $this->getWebDriver()->isW3cCompliant()) {
             try {
                 $frameQuery = $this->getWebDriver()->findElement(WebDriverBy::id($name));
             } catch (NoSuchElementException $e) {
