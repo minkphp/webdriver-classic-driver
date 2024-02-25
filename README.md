@@ -7,6 +7,32 @@
 [![License](https://poser.pugx.org/mink/webdriver-classic-driver/license)](https://github.com/minkphp/webdriver-classic-driver/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/minkphp/webdriver-classic-driver/branch/main/graph/badge.svg?token=11hgqXqod9)](https://codecov.io/gh/minkphp/webdriver-classic-driver)
 
+## Usage Example
+
+``` php
+<?php
+
+use Behat\Mink\Mink,
+    Behat\Mink\Session,
+    Mink\WebdriverClassDriver\WebdriverClassicDriver;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$browserName = 'firefox';
+$url = 'http://example.com';
+
+$mink = new Mink(array(
+    'webdriver-classic' => new Session(new WebdriverClassicDriver($browserName)),
+));
+
+$session = $mink->getSession('webdriver-classic');
+$session->visit($url);
+
+$session->getPage()->findLink('Chat')->click();
+```
+
+Please refer to [MinkExtension-example](https://github.com/Behat/MinkExtension-example) for an executable example.
+
 ## Installation
 
 ``` bash
