@@ -453,7 +453,7 @@ class WebdriverClassicDriver extends CoreDriver
                     break;
             }
         } catch (\Throwable $e) {
-            throw new DriverException("Cannot retrieve $widgetType value: {$e->getMessage()}", 0, $e);
+            throw new DriverException("Cannot set $widgetType value: {$e->getMessage()}", 0, $e);
         }
 
         $this->trigger($xpath, 'blur');
