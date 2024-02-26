@@ -44,12 +44,12 @@ composer require behat/mink mink/webdriver-classic-driver
 1. Start WebDriver
     1. If you have Docker installed, run
     ```bash
-    docker run -p 4444:4444 selenium/standalone-firefox:3.141.59
+    docker run -p 4444:4444 selenium/standalone-firefox:4.18.1
     ```
     2. If you do not have Docker, but you have Java
     ```bash
-    curl -L https://selenium-release.storage.googleapis.com/3.141/selenium-server-standalone-3.141.59.jar > selenium-server-standalone-3.141.59.jar
-    java -jar selenium-server-standalone-3.141.59.jar
+    curl -L https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.18.0/selenium-server-4.18.1.jar > selenium-server-4.18.1.jar
+    java -jar selenium-server-4.18.1.jar standalone
     ```
 2. Start WebServer by running
     ``` bash
