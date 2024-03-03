@@ -19,7 +19,7 @@ class WebdriverClassicExtension implements Extension
     {
         /** @var MinkExtension $extension */
         $extension = $extensionManager->getExtension(MinkExtension::MINK_ID);
-        $extension->registerDriverFactory(new WebDriverClassicFactory());
+        $extension->registerDriverFactory(new WebdriverClassicFactory());
     }
 
     public function process(ContainerBuilder $container): void
