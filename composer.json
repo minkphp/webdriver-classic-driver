@@ -28,12 +28,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Mink\\WebdriverClassDriver\\": "src/"
+            "Mink\\WebdriverClassicDriver\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Mink\\WebdriverClassDriver\\Tests\\": "tests/"
+            "Mink\\WebdriverClassicDriver\\Tests\\": "tests/"
         }
     },
     "extra": {

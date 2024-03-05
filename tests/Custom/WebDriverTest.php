@@ -1,9 +1,9 @@
 <?php
 
-namespace Mink\WebdriverClassDriver\Tests\Custom;
+namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Tests\Driver\TestCase;
-use Mink\WebdriverClassDriver\WebdriverClassicDriver;
+use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebDriverTest extends TestCase
 {
