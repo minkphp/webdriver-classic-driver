@@ -1,10 +1,10 @@
 <?php
 
-namespace Mink\WebdriverClassDriver\Tests\Custom;
+namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Exception\DriverException;
 use Behat\Mink\Tests\Driver\TestCase;
-use Mink\WebdriverClassDriver\WebdriverClassicDriver;
+use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class TimeoutTest extends TestCase
 {
