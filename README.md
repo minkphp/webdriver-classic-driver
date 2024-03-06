@@ -82,7 +82,7 @@ Please refer to [MinkExtension-example](https://github.com/Behat/MinkExtension-e
     ```shell
     ./vendor/bin/mink-test-server
     ```
-3. Start PhpUnit
+3. Run PHPUnit
     ```shell
     ./vendor/bin/phpunit -v --coverage-clover=coverage.clover
     ```
