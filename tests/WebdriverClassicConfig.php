@@ -55,10 +55,6 @@ class WebdriverClassicConfig extends AbstractConfig
             case [$testCase, $test] === [EventsTest::class, 'testKeyboardEvents'] && $this->isOldChrome():
                 return 'Old Chrome does not allow triggering events.';
 
-            case [$testCase, $test] === [EventsTest::class, 'testBlur']:
-            case [$testCase, $test] === [EventsTest::class, 'testFocus']:
-                return 'Focus/blur are not supported anymore.';
-
             case [$testCase, $test] === [EventsTest::class, 'testKeyboardEvents']:
                 return 'Keyboard events are currently not supported.';
 

@@ -696,6 +696,20 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
+    public function focus(
+        #[Language('XPath')]
+        string $xpath
+    ): void {
+        $this->executeJsOnXpath($xpath, 'arguments[0].focus()');
+    }
+
+    public function blur(
+        #[Language('XPath')]
+        string $xpath
+    ): void {
+        $this->executeJsOnXpath($xpath, 'arguments[0].blur()');
+    }
+
     // </editor-fold>
 
     // <editor-fold desc="Private Utilities">
