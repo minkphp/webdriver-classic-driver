@@ -40,5 +40,15 @@
         "branch-alias": {
             "dev-main": "1.x-dev"
         }
+    },
+    "scripts": {
+        "lint": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/phpstan"
+        ],
+        "test": [
+            "Composer\\Config::disableProcessTimeout",
+            "vendor/bin/phpunit"
+        ]
     }
 }

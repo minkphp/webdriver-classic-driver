@@ -42,6 +42,8 @@ composer require "behat/mink" "mink/webdriver-classic-driver"
 
 ## Standalone Usage Example
 
+You'll need to set up Selenium. Refer to [Contributing \ Testing](.github/CONTRIBUTING.md#testing) to see how.
+
 ```php
 <?php
 
@@ -65,24 +67,3 @@ $session->getPage()->findLink('Chat')->click();
 ```
 
 Please refer to [MinkExtension-example](https://github.com/Behat/MinkExtension-example) for an executable example.
-
-## Testing
-
-1. Start WebDriver:
-    1. If you have Docker installed, run:
-        ```shell
-        docker run -p 4444:4444 selenium/standalone-firefox:4.18.1
-        ```
-    2. If you do not have Docker, but you have Java, run:
-        ```shell
-        curl -L https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.18.0/selenium-server-4.18.1.jar > selenium-server-4.18.1.jar
-        java -jar selenium-server-4.18.1.jar standalone
-        ```
-2. Start WebServer by running
-    ```shell
-    ./vendor/bin/mink-test-server
-    ```
-3. Run PHPUnit
-    ```shell
-    ./vendor/bin/phpunit
-    ```
