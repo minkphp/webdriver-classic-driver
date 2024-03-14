@@ -26,7 +26,7 @@ composer run lint
 1. Firstly, you will need to run Selenium and a Web Browser (and/or perhaps a driver in between):
     1. **With Docker** - A `docker-compose.yml` file with sensible defaults is already provided , so you can just run:
          ```shell
-         docker-compose up
+         docker compose up
          ```
     2. **With Java (Native)** - This would take more work, but performs better. Get started by running:
         ```shell

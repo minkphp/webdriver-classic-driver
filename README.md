@@ -42,7 +42,7 @@ composer require "behat/mink" "mink/webdriver-classic-driver"
 
 ## Standalone Usage Example
 
-You'll need to set up Selenium. Refer to [Contributing \ Testing](.github/CONTRIBUTING.md#testing) to see how.
+You will need to run a WebDriver server, either using [Selenium](https://www.selenium.dev/) or the browser driver directly.
 
 ```php
 <?php
