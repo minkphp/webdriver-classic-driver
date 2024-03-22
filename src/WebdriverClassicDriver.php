@@ -1013,6 +1013,12 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function withWindow(?string $name, callable $callback): void
     {
+        if ($name === null) {
+            $callback();
+
+            return;
+        }
+
         $origName = $this->getWindowName();
 
         try {
