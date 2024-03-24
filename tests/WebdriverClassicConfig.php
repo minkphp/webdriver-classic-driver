@@ -40,7 +40,7 @@ class WebdriverClassicConfig extends AbstractConfig
     public function skipMessage($testCase, $test): ?string
     {
         switch (true) {
-            case $testCase === WindowTest::class && $test === 'testWindowMaximize' && $this->isXvfb():
+            case [$testCase, $test] === [WindowTest::class, 'testWindowMaximize'] && $this->isXvfb():
                 return 'Maximizing the window does not work when running the browser in Xvfb.';
 
             case $testCase === BasicAuthTest::class:
@@ -52,8 +52,11 @@ class WebdriverClassicConfig extends AbstractConfig
             case $testCase === StatusCodeTest::class:
                 return 'Checking status code is not supported.';
 
-            case $testCase === EventsTest::class && $test === 'testKeyboardEvents' && $this->isOldChrome():
+            case [$testCase, $test] === [EventsTest::class, 'testKeyboardEvents'] && $this->isOldChrome():
                 return 'Old Chrome does not allow triggering events.';
+
+            case [$testCase, $test] === [EventsTest::class, 'testKeyboardEvents']:
+                return 'Keyboard events are currently not supported.';
 
             default:
                 return parent::skipMessage($testCase, $test);
