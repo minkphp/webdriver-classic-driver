@@ -138,14 +138,19 @@ class WebdriverClassicDriver extends CoreDriver
     {
         // switch to default window..
         $this->switchToWindow();
+        $actualInitialWindowName = $this->getWindowName(); // Account for initial window rename.
+        $webDriver = $this->getWebDriver();
+
         // ..and close all other windows
         foreach ($this->getWindowNames() as $name) {
-            if ($name !== $this->initialWindowName) {
-                $this->withWindow($name, fn() => $this->getWebDriver()->close());
+            if ($name !== $actualInitialWindowName) {
+                $this->switchToWindow($name);
+                $webDriver->close();
+                $this->switchToWindow();
             }
         }
 
-        $this->getWebDriver()->manage()->deleteAllCookies();
+        $webDriver->manage()->deleteAllCookies();
     }
 
     public function visit(string $url): void
