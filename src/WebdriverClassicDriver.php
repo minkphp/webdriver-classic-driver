@@ -136,17 +136,18 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function reset(): void
     {
-        // switch to default window..
-        $this->switchToWindow();
-        $actualInitialWindowName = $this->getWindowName(); // Account for initial window rename.
         $webDriver = $this->getWebDriver();
 
+        // switch to default window..
+        $initialWindow = substr((string)$this->initialWindowName, strlen(self::W3C_WINDOW_HANDLE_PREFIX));
+        $webDriver->switchTo()->window($initialWindow);
+
         // ..and close all other windows
-        foreach ($this->getWindowNames() as $name) {
-            if ($name !== $actualInitialWindowName) {
-                $this->switchToWindow($name);
+        foreach ($webDriver->getWindowHandles() as $tempWindow) {
+            if ($tempWindow !== $initialWindow) {
+                $webDriver->switchTo()->window($tempWindow);
                 $webDriver->close();
-                $this->switchToWindow();
+                $webDriver->switchTo()->window($initialWindow);
             }
         }
 
