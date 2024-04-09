@@ -78,7 +78,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     private string $webDriverHost;
 
-    private ?string $initialWindowName = null;
+    private ?string $initialWindowHandle = null;
 
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
@@ -104,7 +104,7 @@ class WebdriverClassicDriver extends CoreDriver
         try {
             $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
             $this->applyTimeouts();
-            $this->initialWindowName = $this->getWindowName();
+            $this->initialWindowHandle = $this->getWebDriver()->getWindowHandle();
         } catch (\Throwable $e) {
             throw new DriverException("Could not start driver: {$e->getMessage()}", 0, $e);
         }
@@ -138,17 +138,18 @@ class WebdriverClassicDriver extends CoreDriver
     {
         $webDriver = $this->getWebDriver();
 
-        // switch to default window..
-        $initialWindow = substr((string)$this->initialWindowName, strlen(self::W3C_WINDOW_HANDLE_PREFIX));
-        $webDriver->switchTo()->window($initialWindow);
+        // Switch to default window.
+        $this->switchToWindow();
 
-        // ..and close all other windows
-        foreach ($webDriver->getWindowHandles() as $tempWindow) {
-            if ($tempWindow !== $initialWindow) {
-                $webDriver->switchTo()->window($tempWindow);
-                $webDriver->close();
-                $webDriver->switchTo()->window($initialWindow);
+        // Close all windows except the initial one.
+        foreach ($webDriver->getWindowHandles() as $windowHandle) {
+            if ($windowHandle === $this->initialWindowHandle) {
+                continue;
             }
+
+            $webDriver->switchTo()->window($windowHandle);
+            $webDriver->close();
+            $this->switchToWindow();
         }
 
         $webDriver->manage()->deleteAllCookies();
@@ -181,13 +182,9 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function switchToWindow(?string $name = null): void
     {
-        if ($name === null) {
-            $name = $this->initialWindowName;
-        }
-
-        if (is_string($name)) {
-            $name = $this->getWindowHandleFromName($name);
-        }
+        $name = $name === null
+            ? $this->initialWindowHandle
+            : $this->getWindowHandleFromName($name);
 
         $this->getWebDriver()->switchTo()->window((string)$name);
     }
