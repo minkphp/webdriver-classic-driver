@@ -138,9 +138,6 @@ class WebdriverClassicDriver extends CoreDriver
     {
         $webDriver = $this->getWebDriver();
 
-        // Switch to default window.
-        $this->switchToWindow();
-
         // Close all windows except the initial one.
         foreach ($webDriver->getWindowHandles() as $windowHandle) {
             if ($windowHandle === $this->initialWindowHandle) {
@@ -149,9 +146,9 @@ class WebdriverClassicDriver extends CoreDriver
 
             $webDriver->switchTo()->window($windowHandle);
             $webDriver->close();
-            $this->switchToWindow();
         }
 
+        $this->switchToWindow();
         $webDriver->manage()->deleteAllCookies();
     }
 
