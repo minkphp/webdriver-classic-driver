@@ -179,11 +179,11 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function switchToWindow(?string $name = null): void
     {
-        $name = $name === null
+        $handle = $name === null
             ? $this->initialWindowHandle
             : $this->getWindowHandleFromName($name);
 
-        $this->getWebDriver()->switchTo()->window((string)$name);
+        $this->getWebDriver()->switchTo()->window((string)$handle);
     }
 
     public function switchToIFrame(?string $name = null): void
