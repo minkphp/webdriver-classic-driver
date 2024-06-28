@@ -78,7 +78,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     private string $webDriverHost;
 
-    private ?string $initialWindowName = null;
+    private ?string $initialWindowHandle = null;
 
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
@@ -104,7 +104,7 @@ class WebdriverClassicDriver extends CoreDriver
         try {
             $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
             $this->applyTimeouts();
-            $this->initialWindowName = $this->getWindowName();
+            $this->initialWindowHandle = $this->getWebDriver()->getWindowHandle();
         } catch (\Throwable $e) {
             throw new DriverException("Could not start driver: {$e->getMessage()}", 0, $e);
         }
@@ -136,16 +136,20 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function reset(): void
     {
-        // switch to default window..
-        $this->switchToWindow();
-        // ..and close all other windows
-        foreach ($this->getWindowNames() as $name) {
-            if ($name !== $this->initialWindowName) {
-                $this->withWindow($name, fn() => $this->getWebDriver()->close());
+        $webDriver = $this->getWebDriver();
+
+        // Close all windows except the initial one.
+        foreach ($webDriver->getWindowHandles() as $windowHandle) {
+            if ($windowHandle === $this->initialWindowHandle) {
+                continue;
             }
+
+            $webDriver->switchTo()->window($windowHandle);
+            $webDriver->close();
         }
 
-        $this->getWebDriver()->manage()->deleteAllCookies();
+        $this->switchToWindow();
+        $webDriver->manage()->deleteAllCookies();
     }
 
     public function visit(string $url): void
@@ -175,15 +179,11 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function switchToWindow(?string $name = null): void
     {
-        if ($name === null) {
-            $name = $this->initialWindowName;
-        }
+        $handle = $name === null
+            ? $this->initialWindowHandle
+            : $this->getWindowHandleFromName($name);
 
-        if (is_string($name)) {
-            $name = $this->getWindowHandleFromName($name);
-        }
-
-        $this->getWebDriver()->switchTo()->window((string)$name);
+        $this->getWebDriver()->switchTo()->window((string)$handle);
     }
 
     public function switchToIFrame(?string $name = null): void
