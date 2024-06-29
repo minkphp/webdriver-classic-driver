@@ -27,18 +27,7 @@ composer require "behat/mink" "mink/webdriver-classic-driver"
     ```shell
     composer require --dev "behat/behat" "behat/mink" "friends-of-behat/mink-extension" "mink/webdriver-classic-driver"
     ```
-2. Configure Behat to enable the Mink Extension and set it to use this driver, for example:
-    ```yaml
-    # behat.yml
-    default:
-        extensions:
-            Behat\MinkExtension\Extension:
-                browser_name: chrome
-                base_url: https://example.com/
-                sessions:
-                    default:
-                        webdriver-classic: ~
-    ```
+2. Configure Behat to enable the Mink Extension and set it to use this drive.
 
 ## Standalone Usage Example
 
