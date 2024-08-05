@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         php: [ '7.4', '8.0', '8.1', '8.2' ]
-        browser: [ 'firefox', 'chrome']
+        browser: [ 'firefox', 'chrome' ]
         selenium: [ '2.53.1', '3', '4' ]
         include:
           - php: '7.4'
@@ -82,9 +82,6 @@ jobs:
           WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
           DRIVER_MACHINE_BASE_PATH: /fixtures/
         run: |
-          if [ "${{ matrix.browser }}" = "chromium" ]; then
-            WEB_FIXTURES_BROWSER="chrome"
-          fi
           vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox
 
       - name: Upload coverage
