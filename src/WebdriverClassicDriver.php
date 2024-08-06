@@ -63,6 +63,7 @@ class WebdriverClassicDriver extends CoreDriver
     private const BROWSER_NAME_ALIAS_MAP = [
         'edge' => WebDriverBrowserType::MICROSOFT_EDGE,
         'chrome' => WebDriverBrowserType::CHROME,
+        'chromium' => WebDriverBrowserType::CHROME,
         'firefox' => WebDriverBrowserType::FIREFOX,
     ];
 

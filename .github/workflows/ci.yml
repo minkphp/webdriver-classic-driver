@@ -46,6 +46,9 @@ jobs:
           - php: '7.4'
             browser: 'edge'
             selenium: '4'
+          - php: '8.2'
+            browser: 'chromium'
+            selenium: '4'
       fail-fast: false
 
     steps:
