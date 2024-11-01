@@ -294,14 +294,14 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): string {
-        return str_replace(["\r", "\n"], ' ', $this->findElement($xpath)->getText());
+        return $this->getElementDomProperty($this->findElement($xpath), 'innerText');
     }
 
     public function getHtml(
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->getElementDomProperty($this->findElement($xpath), 'innerText');
+        return $this->getElementDomProperty($this->findElement($xpath), 'innerHTML');
     }
 
     public function getOuterHtml(
