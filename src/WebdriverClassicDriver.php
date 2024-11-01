@@ -301,7 +301,7 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->getElementDomProperty($this->findElement($xpath), 'innerHTML');
+        return $this->getElementDomProperty($this->findElement($xpath), 'innerText');
     }
 
     public function getOuterHtml(
