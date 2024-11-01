@@ -295,7 +295,7 @@ class WebdriverClassicDriver extends CoreDriver
         string $xpath
     ): string {
         return str_replace(
-            ["\r", "\n"],
+            ["\r\n", "\r", "\n"],
             ' ',
             $this->getElementDomProperty($this->findElement($xpath), 'innerText')
         );
