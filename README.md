@@ -38,7 +38,7 @@ You will need to run a WebDriver server, either using [Selenium](https://www.sel
 
 use Behat\Mink\Mink,
     Behat\Mink\Session,
-    Mink\WebdriverClassDriver\WebdriverClassicDriver;
+    Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 require_once __DIR__ . '/vendor/autoload.php';
 

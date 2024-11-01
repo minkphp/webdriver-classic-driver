@@ -1,16 +1,15 @@
 <?php
 
-namespace Mink\WebdriverClassDriver\Tests;
+namespace Mink\WebdriverClassicDriver\Tests;
 
 use Behat\Mink\Driver\DriverInterface;
-use Behat\Mink\Exception\DriverException;
 use Behat\Mink\Tests\Driver\AbstractConfig;
 use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
 use Behat\Mink\Tests\Driver\Basic\HeaderTest;
 use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
 use Behat\Mink\Tests\Driver\Js\EventsTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
-use Mink\WebdriverClassDriver\WebdriverClassicDriver;
+use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebdriverClassicConfig extends AbstractConfig
 {
