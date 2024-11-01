@@ -6,5 +6,6 @@
 /phpunit.xml.dist           export-ignore
 /tests                      export-ignore
 /README.md                  export-ignore
+/CONTRIBUTING.md            export-ignore
 /resources/get-syn.php      export-ignore
 /docker-compose.yaml        export-ignore

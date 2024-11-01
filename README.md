@@ -42,7 +42,7 @@ use Behat\Mink\Mink,
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$browserName = 'firefox';
+$browserName = 'chrome';
 $url = 'https://example.com';
 
 $mink = new Mink([
@@ -52,7 +52,7 @@ $mink = new Mink([
 $session = $mink->getSession('webdriver-classic');
 $session->visit($url);
 
-$session->getPage()->findLink('Chat')->click();
+$session->getPage()->findLink('More information...')->click();
 ```
 
 Please refer to [MinkExtension-example](https://github.com/Behat/MinkExtension-example) for an executable example.
