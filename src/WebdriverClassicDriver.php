@@ -963,7 +963,13 @@ class WebdriverClassicDriver extends CoreDriver
 
                     case 'page load':
                     case 'pageLoad':
-                        // ☝️ For MinkSelenium2Driver backward compatibility
+                        @trigger_error(
+                            "Using \"$type\" timeout type is deprecated, please use \"page\" instead",
+                            E_USER_DEPRECATED
+                        );
+                        $timeouts->pageLoadTimeout($param / 1000);
+                        break;
+
                     case 'page':
                         $timeouts->pageLoadTimeout($param / 1000);
                         break;
