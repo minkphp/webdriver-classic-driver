@@ -2,7 +2,6 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
-use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Exception\DriverException;
 use Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
@@ -10,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class WebDriverTest extends TestCase
 {
-    private DriverInterface $driver;
+    private WebdriverClassicDriver $driver;
 
     protected function setUp(): void
     {
@@ -88,10 +87,6 @@ class WebDriverTest extends TestCase
 
     public function testClassicDriverCanProvideBrowserName(): void
     {
-        if (!$this->driver instanceof WebdriverClassicDriver) {
-            $this->markTestSkipped('This test applies to WebdriverClassicDriver only');
-        }
-
         $this->assertSame(
             WebdriverClassicConfig::getInstance()->getBrowserName(),
             $this->driver->getBrowserName()

@@ -18,7 +18,7 @@ class WebdriverClassicConfig extends AbstractConfig
         return new self();
     }
 
-    public function createDriver(): DriverInterface
+    public function createDriver(): WebdriverClassicDriver
     {
         $seleniumHost = $_SERVER['DRIVER_URL'];
 
