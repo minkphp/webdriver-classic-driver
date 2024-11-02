@@ -3,79 +3,60 @@
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Exception\DriverException;
-use Behat\Mink\Tests\Driver\TestCase;
-use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class TimeoutTest extends TestCase
 {
-    /**
-     * @after
-     */
-    protected function resetSessions(): void
+    protected function tearDown(): void
     {
-        $session = $this->getSession();
-        $driver = $this->getSession()->getDriver();
-        assert($driver instanceof WebdriverClassicDriver);
+        $this->driver->setTimeouts([
+            'script' => 30000,
+            'page' => 300000,
+            'implicit' => 0,
+        ]);
 
-        // Stop the session instead of only resetting it, as timeouts are not reset (they are configuring the session itself)
-        if ($session->isStarted()) {
-            $session->stop();
-        }
-
-        // Reset the array of timeouts to avoid impacting other tests
-        $driver->setTimeouts([]);
-
-        parent::resetSessions();
+        parent::tearDown();
     }
 
     public function testInvalidTimeoutSettingThrowsException(): void
     {
-        $this->getSession()->start();
-        $driver = $this->getSession()->getDriver();
-        assert($driver instanceof WebdriverClassicDriver);
+        $this->driver->start();
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Invalid timeout type: invalid');
 
-        $driver->setTimeouts(['invalid' => 0]);
+        $this->driver->setTimeouts(['invalid' => 0]);
     }
 
     public function testShortTimeoutDoesNotWaitForElementToAppear(): void
     {
-        $driver = $this->getSession()->getDriver();
-        assert($driver instanceof WebdriverClassicDriver);
-        $driver->setTimeouts(['implicit' => 0]);
+        $this->driver->start();
+        $this->driver->setTimeouts(['implicit' => 0]);
 
-        $this->getSession()->visit($this->pathTo('/js_test.html'));
-        $this->findById('waitable')->click();
-        $element = $this->getSession()->getPage()->find('css', '#waitable > div');
+        $this->driver->visit($this->pathTo('/js_test.html'));
+        $this->driver->click('//div[@id="waitable"]');
 
-        $this->assertNull($element);
+        $this->assertEmpty($this->driver->getText('//div[@id="waitable"]'));
     }
 
     public function testLongTimeoutWaitsForElementToAppear(): void
     {
-        $driver = $this->getSession()->getDriver();
-        assert($driver instanceof WebdriverClassicDriver);
-        $driver->setTimeouts(['implicit' => 5000]);
+        $this->driver->start();
+        $this->driver->setTimeouts(['implicit' => 5000]);
 
-        $this->getSession()->visit($this->pathTo('/js_test.html'));
-        $this->findById('waitable')->click();
-        $element = $this->getSession()->getPage()->find('css', '#waitable > div');
+        $this->driver->visit($this->pathTo('/js_test.html'));
+        $this->driver->click('//div[@id="waitable"]');
 
-        $this->assertNotNull($element);
+        $this->assertNotEmpty($this->driver->getText('//div[@id="waitable"]/div'));
     }
 
     public function testShortPageLoadTimeoutThrowsException(): void
     {
-        $session = $this->getSession();
-        $driver = $session->getDriver();
-        \assert($driver instanceof WebdriverClassicDriver);
-
-        $driver->setTimeouts(['page' => 500]);
+        $this->driver->start();
+        $this->driver->setTimeouts(['page' => 500]);
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Page failed to load: ');
-        $session->visit($this->pathTo('/page_load.php?sleep=2'));
+
+        $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 }

@@ -956,12 +956,15 @@ class WebdriverClassicDriver extends CoreDriver
                     case 'script':
                         $timeouts->setScriptTimeout($param / 1000);
                         break;
+
                     case 'implicit':
                         $timeouts->implicitlyWait($param / 1000);
                         break;
+
                     case 'page':
                         $timeouts->pageLoadTimeout($param / 1000);
                         break;
+
                     default:
                         throw new DriverException("Invalid timeout type: $type");
                 }
