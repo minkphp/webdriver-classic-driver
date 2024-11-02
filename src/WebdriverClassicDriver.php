@@ -14,6 +14,8 @@ use Behat\Mink\Driver\CoreDriver;
 use Behat\Mink\Exception\DriverException;
 use Facebook\WebDriver\Exception\NoSuchCookieException;
 use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\ScriptTimeoutException;
+use Facebook\WebDriver\Exception\TimeoutException;
 use Facebook\WebDriver\Exception\UnsupportedOperationException;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
@@ -155,7 +157,11 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function visit(string $url): void
     {
-        $this->getWebDriver()->navigate()->to($url);
+        try {
+            $this->getWebDriver()->navigate()->to($url);
+        } catch (TimeoutException|ScriptTimeoutException $e) {
+            throw new DriverException('Page failed to load: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     public function getCurrentUrl(): string
