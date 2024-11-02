@@ -11,7 +11,7 @@ $minkTestServerPort = isset($_SERVER['WEB_FIXTURES_HOST'])
 $minkTestServer = new Process([
     PHP_BINARY,
     '-S',
-    "0.0.0.0:$minkTestServerPort",
+    '0.0.0.0:' . $minkTestServerPort,
     '-t',
     __DIR__ . '/../vendor/mink/driver-testsuite/web-fixtures'
 ]);
