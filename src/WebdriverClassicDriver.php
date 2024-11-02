@@ -961,6 +961,9 @@ class WebdriverClassicDriver extends CoreDriver
                         $timeouts->implicitlyWait($param / 1000);
                         break;
 
+                    case 'page load':
+                    case 'pageLoad':
+                        // ☝️ For MinkSelenium2Driver backward compatibility
                     case 'page':
                         $timeouts->pageLoadTimeout($param / 1000);
                         break;
