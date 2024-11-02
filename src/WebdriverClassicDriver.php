@@ -98,10 +98,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function start(): void
     {
-        if ($this->isStarted()) {
-            throw new DriverException('Driver has already been started');
-        }
-
         try {
             $this->createWebDriver();
             $this->applyTimeouts();
@@ -757,7 +753,7 @@ class WebdriverClassicDriver extends CoreDriver
     protected function createWebDriver(): void
     {
         if ($this->webDriver) {
-            throw new DriverException('Driver has already been created');
+            throw new DriverException('Base driver has already been created');
         }
 
         $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
@@ -772,7 +768,7 @@ class WebdriverClassicDriver extends CoreDriver
             return $this->webDriver;
         }
 
-        throw new DriverException('Driver has not been started');
+        throw new DriverException('Base driver has not been created');
     }
 
     /**

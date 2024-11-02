@@ -30,7 +30,7 @@ class WebDriverTest extends TestCase
     public function testDriverMustBeStartedBeforeUse(): void
     {
         $this->expectException(DriverException::class);
-        $this->expectExceptionMessage('Driver has not been started');
+        $this->expectExceptionMessage('Base driver has not been created');
 
         $this->driver->visit('https://example.com');
     }
@@ -48,7 +48,7 @@ class WebDriverTest extends TestCase
         $this->driver->start();
 
         $this->expectException(DriverException::class);
-        $this->expectExceptionMessage('Driver has already been started');
+        $this->expectExceptionMessage('Base driver has already been created');
 
         $this->driver->start();
     }
