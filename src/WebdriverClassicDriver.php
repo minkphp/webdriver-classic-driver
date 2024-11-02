@@ -89,7 +89,7 @@ class WebdriverClassicDriver extends CoreDriver
         array $desiredCapabilities = [],
         string $webDriverHost = 'http://localhost:4444/wd/hub'
     ) {
-        $this->browserName = self::BROWSER_NAME_ALIAS_MAP[$browserName] ?? $browserName;
+        $this->browserName = $browserName;
         $this->desiredCapabilities = $this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
     }
@@ -771,6 +771,11 @@ class WebdriverClassicDriver extends CoreDriver
         throw new DriverException('Base driver has not been created');
     }
 
+    private function getNormalisedBrowserName(): string
+    {
+        return self::BROWSER_NAME_ALIAS_MAP[$this->browserName] ?? $this->browserName;
+    }
+
     /**
      * Detect and assign appropriate browser capabilities
      *
@@ -784,7 +789,7 @@ class WebdriverClassicDriver extends CoreDriver
         // Set defaults
         $defaults = array_merge(
             self::DEFAULT_CAPABILITIES['default'],
-            self::DEFAULT_CAPABILITIES[$this->browserName] ?? []
+            self::DEFAULT_CAPABILITIES[$this->getNormalisedBrowserName()] ?? []
         );
         foreach ($defaults as $key => $value) {
             if ($caps->getCapability($key) === null) {
@@ -802,7 +807,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     private function getBrowserSpecificCapabilities(): ?DesiredCapabilities
     {
-        switch ($this->browserName) {
+        switch ($this->getNormalisedBrowserName()) {
             case WebDriverBrowserType::FIREFOX:
                 return DesiredCapabilities::firefox();
 
