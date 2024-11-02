@@ -10,6 +10,20 @@ defaults:
     shell: bash
 
 jobs:
+  defaults:
+    name: Set up defaults
+    runs-on: ubuntu-latest
+    outputs:
+      php: ${{ steps.defaults.outputs.php }}
+      browser: ${{ steps.defaults.outputs.browser }}
+      selenium: ${{ steps.defaults.outputs.selenium }}
+    steps:
+      - id: defaults
+        run: |
+          echo 'php="8.3"' >> "$GITHUB_OUTPUT"
+          echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
+          echo 'selenium="4"' >> "$GITHUB_OUTPUT"
+
   check_composer:
     name: Check composer.json
     runs-on: ubuntu-latest
@@ -37,6 +51,7 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    needs: defaults
     env:
       DEFAULT_PHP: '8.3'
       DEFAULT_BROWSER: 'chrome'
@@ -44,33 +59,39 @@ jobs:
     strategy:
       matrix:
         # Check different Selenium versions for common browsers
-        php: [ 'default' ]
-        browser: [ 'firefox', 'chrome' ]
-        selenium: [ '2.53.1', '3', '4' ]
+        php:
+          - ${{ fromJSON(needs.defaults.outputs.php) }}
+        browser:
+          - 'firefox'
+          - 'chrome'
+        selenium:
+          - '2.53.1'
+          - '3'
+          - '4'
         include:
           # Check on different PHP versions
           - php: '7.4'
-            browser: 'default'
-            selenium: 'default'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           - php: '8.0'
-            browser: 'default'
-            selenium: 'default'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           - php: '8.1'
-            browser: 'default'
-            selenium: 'default'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           - php: '8.2'
-            browser: 'default'
-            selenium: 'default'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           - php: '8.3'
-            browser: 'default'
-            selenium: 'default'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           # Check less-common browsers
-          - php: 'default'
+          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
             browser: 'edge'
-            selenium: 'default'
-          - php: 'default'
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
             browser: 'chromium'
-            selenium: 'default'
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
       fail-fast: false
 
     steps:
@@ -81,7 +102,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           coverage: "xdebug"
-          php-version: "${{ matrix.php == 'default' && env.DEFAULT_PHP || matrix.php }}"
+          php-version: "${{ matrix.php }}"
           ini-file: development
 
       - name: Install dependencies
@@ -90,7 +111,7 @@ jobs:
 
       - name: Start Selenium
         run: |
-          SELENIUM_IMAGE=selenium/standalone-${{ matrix.browser == 'default' && env.DEFAULT_BROWSER || matrix.browser }}:${{ matrix.selenium == 'default' && env.DEFAULT_SELENIUM || matrix.selenium }} docker compose up --wait
+          SELENIUM_IMAGE=selenium/standalone-${{ matrix.browser }}:${{ matrix.selenium }} docker compose up --wait
 
       - name: Wait for selenium to start
         run: |
@@ -98,10 +119,10 @@ jobs:
 
       - name: Run tests
         env:
-          SELENIUM_VERSION: ${{ matrix.selenium == 'default' && env.DEFAULT_SELENIUM || matrix.selenium }}
+          SELENIUM_VERSION: ${{ matrix.selenium }}
           DRIVER_URL: http://localhost:4444/wd/hub
           WEB_FIXTURES_HOST: http://host.docker.internal:8002
-          WEB_FIXTURES_BROWSER: ${{ matrix.browser == 'default' && env.DEFAULT_BROWSER || matrix.browser }}
+          WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
           DRIVER_MACHINE_BASE_PATH: /fixtures/
         run: |
           vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox
@@ -124,5 +145,5 @@ jobs:
         uses: actions/upload-artifact@v3
         if: ${{ failure() }}
         with:
-          name: logs_php-${{ matrix.php == 'default' && env.DEFAULT_PHP || matrix.php }}_selenium-${{ matrix.selenium == 'default' && env.DEFAULT_SELENIUM || matrix.selenium }}_${{ matrix.browser == 'default' && env.DEFAULT_BROWSER || matrix.browser }}
+          name: logs_php-${{ matrix.php }}_selenium-${{ matrix.selenium }}_${{ matrix.browser }}
           path: logs
