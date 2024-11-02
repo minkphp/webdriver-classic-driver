@@ -2,32 +2,99 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
-use Behat\Mink\Tests\Driver\TestCase;
+use Behat\Mink\Driver\DriverInterface;
+use Behat\Mink\Exception\DriverException;
+use Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
+use PHPUnit\Framework\TestCase;
 
 class WebDriverTest extends TestCase
 {
+    private DriverInterface $driver;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->getSession()->start();
+        $this->driver = WebdriverClassicConfig::getInstance()->createDriver();
     }
 
     protected function tearDown(): void
     {
-        $this->getSession()->stop();
+        if ($this->driver->isStarted()) {
+            $this->driver->stop();
+        }
 
         parent::tearDown();
     }
 
-    public function testGetWebDriverSessionId(): void
+    public function testDriverMustBeStartedBeforeUse(): void
     {
-        $driver = $this->getSession()->getDriver();
-        assert($driver instanceof WebdriverClassicDriver);
-        $this->assertNotEmpty($driver->getWebDriverSessionId(), 'Started session should have an ID');
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Driver has not been started');
 
-        $driver = new WebdriverClassicDriver();
-        $this->assertNull($driver->getWebDriverSessionId(), 'Non-started session should not have an ID');
+        $this->driver->visit('https://example.com');
+    }
+
+    public function testDriverMustBeStartedBeforeItCanBeStopped(): void
+    {
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Driver has not been started');
+
+        $this->driver->stop();
+    }
+
+    public function testStartedDriverCannotBeSubsequentlyStarted(): void
+    {
+        $this->driver->start();
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Driver has already been started');
+
+        $this->driver->start();
+    }
+
+    public function testDriverCatchesUpstreamErrorsDuringStart(): void
+    {
+        $driver = $this->createPartialMock(WebdriverClassicDriver::class, ['createWebDriver', 'getWebDriver']);
+        $driver
+            ->expects($this->once())
+            ->method('createWebDriver')
+            ->willThrowException(new \RuntimeException('An upstream error'));
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Could not start driver: An upstream error');
+
+        $driver->start();
+    }
+
+    public function testDriverCatchesUpstreamErrorsDuringStop(): void
+    {
+        $driver = $this->createPartialMock(WebdriverClassicDriver::class, ['createWebDriver', 'isStarted', 'getWebDriver']);
+        $driver
+            ->expects($this->once())
+            ->method('isStarted')
+            ->willReturn(true);
+        $driver
+            ->expects($this->once())
+            ->method('getWebDriver')
+            ->willThrowException(new \RuntimeException('An upstream error'));
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Could not close connection: An upstream error');
+
+        $driver->stop();
+    }
+
+    public function testClassicDriverCanProvideBrowserName(): void
+    {
+        if (!$this->driver instanceof WebdriverClassicDriver) {
+            $this->markTestSkipped('This test applies to WebdriverClassicDriver only');
+        }
+
+        $this->assertSame(
+            WebdriverClassicConfig::getInstance()->getBrowserName(),
+            $this->driver->getBrowserName()
+        );
     }
 }
