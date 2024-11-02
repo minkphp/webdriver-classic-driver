@@ -98,12 +98,8 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function start(): void
     {
-        if ($this->isStarted()) {
-            throw new DriverException('Driver has already been started');
-        }
-
         try {
-            $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
+            $this->createWebDriver();
             $this->applyTimeouts();
             $this->initialWindowHandle = $this->getWebDriver()->getWindowHandle();
         } catch (\Throwable $e) {
@@ -118,14 +114,14 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function stop(): void
     {
-        if (!$this->webDriver) {
+        if (!$this->isStarted()) {
             throw new DriverException('Driver has not been started');
         }
 
         try {
             $this->getWebDriver()->quit();
         } catch (\Throwable $e) {
-            throw new DriverException('Could not close connection', 0, $e);
+            throw new DriverException("Could not close connection: {$e->getMessage()}", 0, $e);
         } finally {
             $this->webDriver = null;
         }
@@ -754,13 +750,25 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * @throws DriverException
      */
-    private function getWebDriver(): RemoteWebDriver
+    protected function createWebDriver(): void
+    {
+        if ($this->webDriver) {
+            throw new DriverException('Base driver has already been created');
+        }
+
+        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
+    }
+
+    /**
+     * @throws DriverException
+     */
+    protected function getWebDriver(): RemoteWebDriver
     {
         if ($this->webDriver) {
             return $this->webDriver;
         }
 
-        throw new DriverException('Driver has not been started');
+        throw new DriverException('Base driver has not been created');
     }
 
     /**

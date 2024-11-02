@@ -2,7 +2,6 @@
 
 namespace Mink\WebdriverClassicDriver\Tests;
 
-use Behat\Mink\Driver\DriverInterface;
 use Behat\Mink\Tests\Driver\AbstractConfig;
 use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
 use Behat\Mink\Tests\Driver\Basic\HeaderTest;
@@ -18,12 +17,16 @@ class WebdriverClassicConfig extends AbstractConfig
         return new self();
     }
 
-    public function createDriver(): DriverInterface
+    public function createDriver(): WebdriverClassicDriver
     {
-        $browser = getenv('WEB_FIXTURES_BROWSER') ?: WebdriverClassicDriver::DEFAULT_BROWSER;
         $seleniumHost = $_SERVER['DRIVER_URL'];
 
-        return new WebdriverClassicDriver($browser, [], $seleniumHost);
+        return new WebdriverClassicDriver($this->getBrowserName(), [], $seleniumHost);
+    }
+
+    public function getBrowserName(): string
+    {
+        return getenv('WEB_FIXTURES_BROWSER') ?: WebdriverClassicDriver::DEFAULT_BROWSER;
     }
 
     public function mapRemoteFilePath($file): string
