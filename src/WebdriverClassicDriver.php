@@ -967,8 +967,7 @@ class WebdriverClassicDriver extends CoreDriver
                             "Using \"$type\" timeout type is deprecated, please use \"page\" instead",
                             E_USER_DEPRECATED
                         );
-                        $timeouts->pageLoadTimeout($param / 1000);
-                        break;
+                        // no break
 
                     case 'page':
                         $timeouts->pageLoadTimeout($param / 1000);
