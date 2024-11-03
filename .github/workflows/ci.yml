@@ -52,10 +52,6 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     needs: defaults
-    env:
-      DEFAULT_PHP: '8.3'
-      DEFAULT_BROWSER: 'chrome'
-      DEFAULT_SELENIUM: '4'
     strategy:
       matrix:
         # Check different Selenium versions for common browsers
