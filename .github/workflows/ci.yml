@@ -10,6 +10,20 @@ defaults:
     shell: bash
 
 jobs:
+  defaults:
+    name: Set up defaults
+    runs-on: ubuntu-latest
+    outputs:
+      php: ${{ steps.defaults.outputs.php }}
+      browser: ${{ steps.defaults.outputs.browser }}
+      selenium: ${{ steps.defaults.outputs.selenium }}
+    steps:
+      - id: defaults
+        run: |
+          echo 'php="8.3"' >> "$GITHUB_OUTPUT"
+          echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
+          echo 'selenium="4"' >> "$GITHUB_OUTPUT"
+
   check_composer:
     name: Check composer.json
     runs-on: ubuntu-latest
@@ -37,18 +51,43 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    needs: defaults
     strategy:
       matrix:
-        php: [ '7.4', '8.0', '8.1', '8.2' ]
-        browser: [ 'firefox', 'chrome' ]
-        selenium: [ '2.53.1', '3', '4' ]
+        # Check different Selenium versions for common browsers
+        php:
+          - ${{ fromJSON(needs.defaults.outputs.php) }}
+        browser:
+          - 'firefox'
+          - 'chrome'
+        selenium:
+          - '2.53.1'
+          - '3'
+          - '4'
         include:
+          # Check on different PHP versions
           - php: '7.4'
-            browser: 'edge'
-            selenium: '4'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.0'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.1'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           - php: '8.2'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.3'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          # Check less-common browsers
+          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
+            browser: 'edge'
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
             browser: 'chromium'
-            selenium: '4'
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
       fail-fast: false
 
     steps:
@@ -99,7 +138,7 @@ jobs:
           docker compose logs --no-color &> ./logs/selenium.log
 
       - name: Archive logs artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: logs_php-${{ matrix.php }}_selenium-${{ matrix.selenium }}_${{ matrix.browser }}
