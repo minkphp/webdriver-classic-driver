@@ -3,30 +3,10 @@
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Exception\DriverException;
-use Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
-use PHPUnit\Framework\TestCase;
 
 class WebDriverTest extends TestCase
 {
-    private WebdriverClassicDriver $driver;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->driver = WebdriverClassicConfig::getInstance()->createDriver();
-    }
-
-    protected function tearDown(): void
-    {
-        if ($this->driver->isStarted()) {
-            $this->driver->stop();
-        }
-
-        parent::tearDown();
-    }
-
     public function testDriverMustBeStartedBeforeUse(): void
     {
         $this->expectException(DriverException::class);
@@ -88,7 +68,7 @@ class WebDriverTest extends TestCase
     public function testClassicDriverCanProvideBrowserName(): void
     {
         $this->assertSame(
-            WebdriverClassicConfig::getInstance()->getBrowserName(),
+            $this->getConfig()->getBrowserName(),
             $this->driver->getBrowserName()
         );
     }
