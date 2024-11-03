@@ -73,7 +73,6 @@ class TimeoutTest extends TestCase
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Page failed to load: ');
-
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 
