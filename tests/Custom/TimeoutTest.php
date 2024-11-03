@@ -35,6 +35,7 @@ class TimeoutTest extends TestCase
         assert($driver instanceof WebdriverClassicDriver);
 
         $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Invalid timeout type: invalid');
 
         $driver->setTimeouts(['invalid' => 0]);
     }
@@ -63,5 +64,18 @@ class TimeoutTest extends TestCase
         $element = $this->getSession()->getPage()->find('css', '#waitable > div');
 
         $this->assertNotNull($element);
+    }
+
+    public function testShortPageLoadTimeoutThrowsException(): void
+    {
+        $session = $this->getSession();
+        $driver = $session->getDriver();
+        \assert($driver instanceof WebdriverClassicDriver);
+
+        $driver->setTimeouts(['page' => 500]);
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Page failed to load: ');
+        $session->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 }
