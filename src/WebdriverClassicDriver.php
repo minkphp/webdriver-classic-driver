@@ -77,7 +77,16 @@ class WebdriverClassicDriver extends CoreDriver
 
     private DesiredCapabilities $desiredCapabilities;
 
-    private array $timeouts = [];
+    /**
+     * Default timeouts as per [W3C Specification](https://w3c.github.io/webdriver/#timeouts), in milliseconds.
+     *
+     * @var array<string, null|int>
+     */
+    private array $timeouts = [
+        'script' => 30000,
+        'page' => 300000,
+        'implicit' => 0,
+    ];
 
     private string $webDriverHost;
 
@@ -967,7 +976,7 @@ class WebdriverClassicDriver extends CoreDriver
                             "Using \"$type\" timeout type is deprecated, please use \"page\" instead",
                             E_USER_DEPRECATED
                         );
-                        // no break
+                    // no break
 
                     case 'page':
                         $timeouts->pageLoadTimeout($param / 1000);
