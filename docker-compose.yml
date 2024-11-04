@@ -18,5 +18,7 @@ services:
       - "7900:7900"
       # VNC Server port (old "-debug" images)
       - "5900:5900"
+      # Web Server
+      - "8002:8002"
     extra_hosts:
       - host.docker.internal:host-gateway
