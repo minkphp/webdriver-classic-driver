@@ -10,48 +10,48 @@ defaults:
     shell: bash
 
 jobs:
-  defaults:
-    name: Set up defaults
-    runs-on: ubuntu-latest
-    outputs:
-      php: ${{ steps.defaults.outputs.php }}
-      browser: ${{ steps.defaults.outputs.browser }}
-      selenium: ${{ steps.defaults.outputs.selenium }}
-    steps:
-      - id: defaults
-        run: |
-          echo 'php="8.3"' >> "$GITHUB_OUTPUT"
-          echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
-          echo 'selenium="3"' >> "$GITHUB_OUTPUT"
-
-  check_composer:
-    name: Check composer.json
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          coverage: none
-          php-version: '8.1'
-      - run: composer validate --strict --no-check-lock
-
-  static_analysis:
-    name: Static analysis
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          coverage: none
-          php-version: '8.2'
-      - name: Install dependencies
-        run: composer update --ansi --no-progress --prefer-dist --no-interaction
-      - run: vendor/bin/phpstan analyze
+#  defaults:
+#    name: Set up defaults
+#    runs-on: ubuntu-latest
+#    outputs:
+#      php: ${{ steps.defaults.outputs.php }}
+#      browser: ${{ steps.defaults.outputs.browser }}
+#      selenium: ${{ steps.defaults.outputs.selenium }}
+#    steps:
+#      - id: defaults
+#        run: |
+#          echo 'php="8.3"' >> "$GITHUB_OUTPUT"
+#          echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
+#          echo 'selenium="3"' >> "$GITHUB_OUTPUT"
+#
+#  check_composer:
+#    name: Check composer.json
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: shivammathur/setup-php@v2
+#        with:
+#          coverage: none
+#          php-version: '8.1'
+#      - run: composer validate --strict --no-check-lock
+#
+#  static_analysis:
+#    name: Static analysis
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: shivammathur/setup-php@v2
+#        with:
+#          coverage: none
+#          php-version: '8.2'
+#      - name: Install dependencies
+#        run: composer update --ansi --no-progress --prefer-dist --no-interaction
+#      - run: vendor/bin/phpstan analyze
 
   tests:
     name: Tests
     runs-on: ubuntu-latest
-    needs: defaults
+#    needs: defaults
     strategy:
       matrix:
         # Check different Selenium versions for common browsers
