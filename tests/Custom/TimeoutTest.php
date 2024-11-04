@@ -51,25 +51,31 @@ class TimeoutTest extends TestCase
 
     /**
      * @group legacy
-     * @dataProvider deprecatedPageLoadDataProvider
      */
-    public function testDeprecatedShortPageLoadTimeoutThrowsException(string $type): void
+    public function testDeprecatedShortPageLoadTimeoutThrowsException1(): void
     {
         $this->driver->start();
 
-        $this->expectDeprecation('Using "' . $type . '" timeout type is deprecated, please use "page" instead');
-        $this->driver->setTimeouts([$type => 500]);
+        $this->expectDeprecation('Using "pageLoad" timeout type is deprecated, please use "page" instead');
+        $this->driver->setTimeouts(['pageLoad' => 500]);
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Page failed to load: ');
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 
-    public static function deprecatedPageLoadDataProvider(): array
+    /**
+     * @group legacy
+     */
+    public function testDeprecatedShortPageLoadTimeoutThrowsException2(): void
     {
-        return [
-            'selenium 3 style' => ['type' => 'pageLoad'],
-            'selenium 2 style' => ['type' => 'page load'],
-        ];
+        $this->driver->start();
+
+        $this->expectDeprecation('Using "page load" timeout type is deprecated, please use "page" instead');
+        $this->driver->setTimeouts(['page load' => 500]);
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Page failed to load: ');
+        $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 }
