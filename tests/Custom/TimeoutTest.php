@@ -18,8 +18,6 @@ class TimeoutTest extends TestCase
 
     public function testShortTimeoutDoesNotWaitForElementToAppear(): void
     {
-        $this->fail('URL is: ' . $this->pathTo('/js_test.html'));
-
         $this->driver->start();
         $this->driver->setTimeouts(['implicit' => 0]);
 
