@@ -980,6 +980,13 @@ class WebdriverClassicDriver extends CoreDriver
         } catch (\Throwable $e) {
             throw new DriverException("Error setting timeout: {$e->getMessage()}", 0, $e);
         }
+
+        $timeouts = $this->webDriver->executeCustomCommand(
+            '/session/:sessionId/timeouts',
+            'GET'
+        );
+
+        print_r($timeouts);
     }
 
     /**
