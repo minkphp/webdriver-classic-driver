@@ -107,7 +107,7 @@ jobs:
 
       - name: Setup Mink test server
         env:
-          MINK_HOST: host.docker.internal:8002
+          MINK_HOST: localhost:8002
         run: |
           mkdir ./logs
           ./vendor/bin/mink-test-server &> ./logs/mink-test-server.log &
@@ -119,7 +119,8 @@ jobs:
       - name: Wait for Selenium Server and Web Server to start
         run: |
           curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:4444/wd/hub/status
-          while ! nc -z host.docker.internal 8002 </dev/null; do echo Waiting for PHP server to start...; sleep 1; done
+          cat ./logs/mink-test-server.log
+          while ! nc -z localhost 8002 </dev/null; do echo Waiting for PHP server to start...; sleep 1; done
 
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
