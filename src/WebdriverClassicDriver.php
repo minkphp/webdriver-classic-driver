@@ -77,16 +77,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     private DesiredCapabilities $desiredCapabilities;
 
-    /**
-     * Default timeouts as per [W3C Specification](https://w3c.github.io/webdriver/#timeouts), in milliseconds.
-     *
-     * @var array<string, null|int>
-     */
-    private array $timeouts = [
-        'script' => 30000,
-        'page' => 300000,
-        'implicit' => 0,
-    ];
+    private array $timeouts = [];
 
     private string $webDriverHost;
 

@@ -8,11 +8,7 @@ class TimeoutTest extends TestCase
 {
     protected function tearDown(): void
     {
-        $this->driver->setTimeouts([
-            'script' => 30000,
-            'page' => 300000,
-            'implicit' => 0,
-        ]);
+        $this->driver->setTimeouts([]);
 
         parent::tearDown();
     }
