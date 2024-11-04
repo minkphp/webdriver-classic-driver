@@ -61,10 +61,10 @@ jobs:
 #          - 'firefox'
           - 'chrome'
         selenium:
-#          - '2.53.1'
+          - '2.53.1'
           - '3'
-#          - '4'
-        include:
+          - '4'
+#        include:
           # Check on different PHP versions
 #          - php: '7.4'
 #            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
@@ -78,9 +78,9 @@ jobs:
 #          - php: '8.2'
 #            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
 #            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
-          - php: '8.3'
-            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
-            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+#          - php: '8.3'
+#            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           # Check less-common browsers
 #          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
 #            browser: 'edge'
