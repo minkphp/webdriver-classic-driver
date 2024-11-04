@@ -981,6 +981,8 @@ class WebdriverClassicDriver extends CoreDriver
             throw new DriverException("Error setting timeout: {$e->getMessage()}", 0, $e);
         }
 
+        echo 'Session ID: ' . $this->getWebDriverSessionId() . PHP_EOL;
+
         $timeouts = $this->getWebDriver()->executeCustomCommand(
             '/session/:sessionId/timeouts',
             'GET'
