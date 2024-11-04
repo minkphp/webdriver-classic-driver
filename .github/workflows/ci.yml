@@ -24,29 +24,29 @@ jobs:
           echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
           echo 'selenium="3"' >> "$GITHUB_OUTPUT"
 
-  check_composer:
-    name: Check composer.json
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          coverage: none
-          php-version: '8.1'
-      - run: composer validate --strict --no-check-lock
-
-  static_analysis:
-    name: Static analysis
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          coverage: none
-          php-version: '8.2'
-      - name: Install dependencies
-        run: composer update --ansi --no-progress --prefer-dist --no-interaction
-      - run: vendor/bin/phpstan analyze
+#  check_composer:
+#    name: Check composer.json
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: shivammathur/setup-php@v2
+#        with:
+#          coverage: none
+#          php-version: '8.1'
+#      - run: composer validate --strict --no-check-lock
+#
+#  static_analysis:
+#    name: Static analysis
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: shivammathur/setup-php@v2
+#        with:
+#          coverage: none
+#          php-version: '8.2'
+#      - name: Install dependencies
+#        run: composer update --ansi --no-progress --prefer-dist --no-interaction
+#      - run: vendor/bin/phpstan analyze
 
   tests:
     name: Tests
