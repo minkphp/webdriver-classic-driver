@@ -20,7 +20,7 @@
     <php>
         <var name="driver_config_factory" value="Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig::getInstance"/>
 
-        <env name="WEB_FIXTURES_HOST" value="http://aaa-host.docker.internal:8002"/>
+        <env name="WEB_FIXTURES_HOST" value="http://host.docker.internal:8002"/>
         <!-- MacOS -->
         <!--<env name="WEB_FIXTURES_HOST" value="http://docker.for.mac.localhost:8002"/>-->
 
