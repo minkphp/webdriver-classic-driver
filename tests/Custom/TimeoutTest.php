@@ -4,6 +4,9 @@ namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Exception\DriverException;
 
+/**
+ * @group timeouts
+ */
 class TimeoutTest extends TestCase
 {
     protected function tearDown(): void
