@@ -56,7 +56,7 @@ jobs:
       matrix:
         # Check different Selenium versions for common browsers
         php:
-          - ${{ fromJSON(needs.defaults.outputs.php) }}
+          - '8.3'
         browser:
 #          - 'firefox'
           - 'chrome'
