@@ -21,26 +21,43 @@ class WebdriverClassicConfig extends AbstractConfig
     {
         $seleniumHost = $_SERVER['DRIVER_URL'];
 
-        // TODO This is temporary until we have first-class support for switching to headless mode
-        $capabilities = [];
-        if ($this->isChrome() && !$this->isHeaded()) {
-            $capabilities = [
-                'goog:chromeOptions' => [
-                    'excludeSwitches' => ['enable-automation'],
-                    'args' => [
-                        'no-first-run',
-                        'no-default-browser-check',
-                        'disable-dev-shm-usage',
-                        'ignore-certificate-errors',
-                        'window-size=1050,720',
-                        'disable-gpu',
-                        'headless=new',
-                    ],
-                ],
-            ];
-        }
+        return new WebdriverClassicDriver(
+            $this->getBrowserName(),
+            // TODO This is temporary until we have first-class support for switching to headless mode
+            $this->isHeaded() ? [] : $this->getHeadlessCapabilities(),
+            $seleniumHost
+        );
+    }
 
-        return new WebdriverClassicDriver($this->getBrowserName(), $capabilities, $seleniumHost);
+    private function getHeadlessCapabilities(): array
+    {
+        switch ($browser = getenv('WEB_FIXTURES_BROWSER')) {
+            case 'chrome':
+                return [
+                    'goog:chromeOptions' => [
+                        'excludeSwitches' => ['enable-automation'],
+                        'args' => [
+                            'no-first-run',
+                            'no-default-browser-check',
+                            'disable-dev-shm-usage',
+                            'disable-gpu',
+                            'headless=new',
+                        ],
+                    ],
+                ];
+
+            case 'firefox':
+                return [
+                    'moz:firefoxOptions' => [
+                        'args' => [
+                            '-headless',
+                        ],
+                    ],
+                ];
+
+            default:
+                throw new \RuntimeException("Cannot get headless capabilities of unsupported browser: $browser");
+        }
     }
 
     public function getBrowserName(): string
@@ -99,17 +116,13 @@ class WebdriverClassicConfig extends AbstractConfig
 
     private function isHeaded(): bool
     {
-        return filter_var(getenv('HEADED'), FILTER_VALIDATE_BOOLEAN);
-    }
-
-    private function isChrome(): bool
-    {
-        return getenv('WEB_FIXTURES_BROWSER') === 'chrome';
+        $headed = getenv('HEADED');
+        return filter_var($headed !== false ? $headed : 'true', FILTER_VALIDATE_BOOLEAN);
     }
 
     private function isOldChrome(): bool
     {
-        return $this->isChrome()
+        return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
             && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
     }
 }
