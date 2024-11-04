@@ -69,7 +69,7 @@ class TimeoutTest extends TestCase
     {
         return [
             'selenium 3 style' => ['type' => 'pageLoad'],
-//            'selenium 2 style' => ['type' => 'page load'],
+            'selenium 2 style' => ['type' => 'page load'],
         ];
     }
 }
