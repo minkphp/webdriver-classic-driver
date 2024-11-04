@@ -121,7 +121,7 @@ jobs:
           WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
           DRIVER_MACHINE_BASE_PATH: /fixtures/
         run: |
-          vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox --filter WindowTest --filter TimeoutTest
+          vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox --filter "/(WindowTest|TimeoutTest)/"
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
