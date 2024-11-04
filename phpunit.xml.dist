@@ -20,15 +20,15 @@
     <php>
         <var name="driver_config_factory" value="Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig::getInstance"/>
 
-        <server name="WEB_FIXTURES_HOST" value="http://aaa-host.docker.internal:8002"/>
+        <env name="WEB_FIXTURES_HOST" value="http://aaa-host.docker.internal:8002"/>
         <!-- MacOS -->
-        <!--<server name="WEB_FIXTURES_HOST" value="http://docker.for.mac.localhost:8002"/>-->
+        <!--<env name="WEB_FIXTURES_HOST" value="http://docker.for.mac.localhost:8002"/>-->
 
         <!-- where driver will connect to -->
-        <server name="DRIVER_URL" value="http://localhost:4444/wd/hub"/>
+        <env name="DRIVER_URL" value="http://localhost:4444/wd/hub"/>
 
         <!-- where DocumentRoot of 'Test Machine' is mounted to on 'Driver Machine' (only if these are 2 different machines) -->
-        <server name="DRIVER_MACHINE_BASE_PATH" value="/fixtures/"/>
+        <env name="DRIVER_MACHINE_BASE_PATH" value="/fixtures/"/>
 
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
     </php>
