@@ -106,6 +106,8 @@ jobs:
           composer update --no-interaction --prefer-dist --ansi --no-progress
 
       - name: Setup Mink test server
+        env:
+          MINK_HOST: host.docker.internal:8002
         run: |
           mkdir ./logs
           ./vendor/bin/mink-test-server &> ./logs/mink-test-server.log &
