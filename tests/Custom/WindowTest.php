@@ -49,29 +49,29 @@ final class WindowTest extends TestCase
 
     public function testGetWindowNames(): void
     {
-        file_put_contents(STDOUT, "### 1 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 1 ###\n", FILE_APPEND);
         $this->getSession()->visit($this->pathTo('/window.html'));
-        file_put_contents(STDOUT, "### 2 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 2 ###\n", FILE_APPEND);
         $session = $this->getSession();
-        file_put_contents(STDOUT, "### 3 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 3 ###\n", FILE_APPEND);
         $page = $session->getPage();
-        file_put_contents(STDOUT, "### 4 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 4 ###\n", FILE_APPEND);
         $windowName = $this->getSession()->getWindowName();
-        file_put_contents(STDOUT, "### 5 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 5 ###\n", FILE_APPEND);
         $this->assertNotNull($windowName);
-        file_put_contents(STDOUT, "### 6 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 6 ###\n", FILE_APPEND);
         $page->clickLink('Popup #1');
-        file_put_contents(STDOUT, "### 7 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 7 ###\n", FILE_APPEND);
         $page->clickLink('Popup #2');
-        file_put_contents(STDOUT, "### 8 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 8 ###\n", FILE_APPEND);
         $windowNames = $this->getSession()->getWindowNames();
-        file_put_contents(STDOUT, "### 9 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 9 ###\n", FILE_APPEND);
         $this->assertNotNull($windowNames[0]);
-        file_put_contents(STDOUT, "### 10 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 10 ###\n", FILE_APPEND);
         $this->assertNotNull($windowNames[1]);
-        file_put_contents(STDOUT, "### 11 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 11 ###\n", FILE_APPEND);
         $this->assertNotNull($windowNames[2]);
-        file_put_contents(STDOUT, "### 12 ###\n", FILE_APPEND);
+        file_put_contents('php://stdout', "### 12 ###\n", FILE_APPEND);
     }
 
     public function testResizeWindow(): void
