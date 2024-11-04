@@ -144,6 +144,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function reset(): void
     {
+        $this->setTimeouts([]);
         $webDriver = $this->getWebDriver();
 
         // Close all windows except the initial one.
@@ -959,8 +960,16 @@ class WebdriverClassicDriver extends CoreDriver
     private function applyTimeouts(): void
     {
         try {
+            $actualTimeouts = array_merge(
+                [
+                    'implicit' => 0,
+                    'page' => 300000,
+                    'script' => 30000,
+                ],
+                $this->timeouts
+            );
             $timeouts = $this->getWebDriver()->manage()->timeouts();
-            foreach ($this->timeouts as $type => $param) {
+            foreach ($actualTimeouts as $type => $param) {
                 switch ($type) {
                     case 'script':
                         $timeouts->setScriptTimeout($param / 1000);
