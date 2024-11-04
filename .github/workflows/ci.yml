@@ -113,6 +113,15 @@ jobs:
         run: |
           curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:4444/wd/hub/status
 
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+        env:
+          SELENIUM_VERSION: ${{ matrix.selenium }}
+          DRIVER_URL: http://localhost:4444/wd/hub
+          WEB_FIXTURES_HOST: http://host.docker.internal:8002
+          WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
+          DRIVER_MACHINE_BASE_PATH: /fixtures/
+
       - name: Run tests
         env:
           SELENIUM_VERSION: ${{ matrix.selenium }}
