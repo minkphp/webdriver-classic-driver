@@ -21,7 +21,26 @@ class WebdriverClassicConfig extends AbstractConfig
     {
         $seleniumHost = $_SERVER['DRIVER_URL'];
 
-        return new WebdriverClassicDriver($this->getBrowserName(), [], $seleniumHost);
+        // TODO This is temporary until we have first-class support for switching to headless mode
+        $capabilities = [];
+        if ($this->isChrome() && !$this->isHeaded()) {
+            $capabilities = [
+                'goog:chromeOptions' => [
+                    'excludeSwitches' => ['enable-automation'],
+                    'args' => [
+                        'no-first-run',
+                        'no-default-browser-check',
+                        'disable-dev-shm-usage',
+                        'ignore-certificate-errors',
+                        'window-size=1050,720',
+                        'disable-gpu',
+                        'headless=new',
+                    ],
+                ],
+            ];
+        }
+
+        return new WebdriverClassicDriver($this->getBrowserName(), $capabilities, $seleniumHost);
     }
 
     public function getBrowserName(): string
@@ -43,6 +62,7 @@ class WebdriverClassicConfig extends AbstractConfig
     public function skipMessage($testCase, $test): ?string
     {
         switch (true) {
+            // TODO I believe this may no longer be a problem in headless mode
             case $testCase === WindowTest::class && $test === 'testWindowMaximize' && $this->isXvfb():
                 return 'Maximizing the window does not work when running the browser in Xvfb.';
 
@@ -73,12 +93,23 @@ class WebdriverClassicConfig extends AbstractConfig
 
     private function isXvfb(): bool
     {
-        return getenv('GITHUB_ACTIONS') === 'true';
+        return $this->isHeaded()
+            || filter_var(getenv('GITHUB_ACTIONS'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    private function isHeaded(): bool
+    {
+        return filter_var(getenv('HEADED'), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    private function isChrome(): bool
+    {
+        return getenv('WEB_FIXTURES_BROWSER') === 'chrome';
     }
 
     private function isOldChrome(): bool
     {
-        return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
+        return $this->isChrome()
             && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
     }
 }

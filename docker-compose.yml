@@ -9,6 +9,7 @@ services:
       VNC_NO_PASSWORD: 1
       SCREEN_WIDTH: 1024
       SCREEN_HEIGHT: 768
+      START_XVFB: ${HEADED:-true}
     volumes:
       - /dev/shm:/dev/shm
       - ./vendor/mink/driver-testsuite/web-fixtures:/fixtures
