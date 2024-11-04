@@ -105,22 +105,28 @@ jobs:
         run: |
           composer update --no-interaction --prefer-dist --ansi --no-progress
 
+      - name: Setup Mink test server
+        run: |
+          mkdir ./logs
+          ./vendor/bin/mink-test-server &> ./logs/mink-test-server.log &
+
       - name: Start Selenium
         run: |
           SELENIUM_IMAGE=selenium/standalone-${{ matrix.browser }}:${{ matrix.selenium }} docker compose up --wait
 
-      - name: Wait for selenium to start
+      - name: Wait for Selenium Server and Web Server to start
         run: |
           curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:4444/wd/hub/status
+          while ! nc -z localhost 8002 </dev/null; do echo Waiting for PHP server to start...; sleep 1; done
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-        env:
-          SELENIUM_VERSION: ${{ matrix.selenium }}
-          DRIVER_URL: http://localhost:4444/wd/hub
-          WEB_FIXTURES_HOST: http://host.docker.internal:8002
-          WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
-          DRIVER_MACHINE_BASE_PATH: /fixtures/
+#      - name: Setup upterm session
+#        uses: lhotari/action-upterm@v1
+#        env:
+#          SELENIUM_VERSION: ${{ matrix.selenium }}
+#          DRIVER_URL: http://localhost:4444/wd/hub
+#          WEB_FIXTURES_HOST: http://host.docker.internal:8002
+#          WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
+#          DRIVER_MACHINE_BASE_PATH: /fixtures/
 
       - name: Run tests
         env:

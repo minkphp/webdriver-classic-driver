@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Symfony\Component\Process\Process;
+/*use Symfony\Component\Process\Process;
 
 $minkTestServerPort = isset($_SERVER['WEB_FIXTURES_HOST'])
     ? parse_url($_SERVER['WEB_FIXTURES_HOST'], PHP_URL_PORT)
@@ -19,4 +19,4 @@ $minkTestServer->start();
 
 register_shutdown_function(
     static fn() => $minkTestServer->stop()
-);
+);*/
