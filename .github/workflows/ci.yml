@@ -106,8 +106,11 @@ jobs:
           composer update --no-interaction --prefer-dist --ansi --no-progress
 
       - name: Start Selenium
+        env:
+          HEADED: false
+          SELENIUM_IMAGE: selenium/standalone-${{ matrix.browser }}:${{ matrix.selenium }}
         run: |
-          HEADED=false SELENIUM_IMAGE=selenium/standalone-${{ matrix.browser }}:${{ matrix.selenium }} docker compose up --wait
+          docker compose up --wait
 
       - name: Wait for selenium to start
         run: |
@@ -115,6 +118,7 @@ jobs:
 
       - name: Run tests
         env:
+          HEADED: false
           SELENIUM_VERSION: ${{ matrix.selenium }}
           DRIVER_URL: http://localhost:4444/wd/hub
           WEB_FIXTURES_HOST: http://host.docker.internal:8002
