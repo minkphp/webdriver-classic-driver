@@ -48,28 +48,4 @@ class TimeoutTest extends TestCase
 
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
-
-    /**
-     * @group legacy
-     * @dataProvider deprecatedPageLoadDataProvider
-     */
-    public function testDeprecatedShortPageLoadTimeoutThrowsException(string $type): void
-    {
-        $this->driver->start();
-
-        $this->expectDeprecation('Using "' . $type . '" timeout type is deprecated, please use "page" instead');
-        $this->driver->setTimeouts([$type => 500]);
-
-        $this->expectException(DriverException::class);
-        $this->expectExceptionMessage('Page failed to load: ');
-        $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
-    }
-
-    public static function deprecatedPageLoadDataProvider(): array
-    {
-        return [
-            'selenium 3 style' => ['type' => 'pageLoad'],
-            'selenium 2 style' => ['type' => 'page load'],
-        ];
-    }
 }
