@@ -107,7 +107,7 @@ jobs:
 
       - name: Setup Mink test server
         env:
-          MINK_HOST: localhost:8002
+          MINK_HOST: 0.0.0.0:8002
         run: |
           mkdir ./logs
           ./vendor/bin/mink-test-server &> ./logs/mink-test-server.log &
