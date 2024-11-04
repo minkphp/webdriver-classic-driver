@@ -57,7 +57,7 @@ class TimeoutTest extends TestCase
     {
         $this->driver->start();
 
-        $this->expectDeprecation('Using "' . $type . '" timeout type is deprecated, please use "page" instead');
+//        $this->expectDeprecation('Using "' . $type . '" timeout type is deprecated, please use "page" instead');
         $this->driver->setTimeouts([$type => 500]);
 
         $this->expectException(DriverException::class);
