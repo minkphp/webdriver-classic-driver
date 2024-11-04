@@ -15,7 +15,11 @@ $minkTestServer = new Process([
     '-t',
     __DIR__ . '/../vendor/mink/driver-testsuite/web-fixtures'
 ]);
-$minkTestServer->start();
+$minkTestServer->start(
+    is_dir(__DIR__ . '/../logs')
+        ? static fn($type, $data) => file_put_contents(__DIR__ . '/../logs/php.log', "$type > $data\n", FILE_APPEND)
+        : null
+);
 
 register_shutdown_function(
     static fn() => $minkTestServer->stop()
