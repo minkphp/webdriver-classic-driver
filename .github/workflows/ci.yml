@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-#  pull_request:
+  pull_request:
   workflow_dispatch:
 
 defaults:
@@ -22,31 +22,31 @@ jobs:
         run: |
           echo 'php="8.3"' >> "$GITHUB_OUTPUT"
           echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
-          echo 'selenium="3"' >> "$GITHUB_OUTPUT"
+          echo 'selenium="4"' >> "$GITHUB_OUTPUT"
 
-#  check_composer:
-#    name: Check composer.json
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: shivammathur/setup-php@v2
-#        with:
-#          coverage: none
-#          php-version: '8.1'
-#      - run: composer validate --strict --no-check-lock
-#
-#  static_analysis:
-#    name: Static analysis
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: shivammathur/setup-php@v2
-#        with:
-#          coverage: none
-#          php-version: '8.2'
-#      - name: Install dependencies
-#        run: composer update --ansi --no-progress --prefer-dist --no-interaction
-#      - run: vendor/bin/phpstan analyze
+  check_composer:
+    name: Check composer.json
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          php-version: '8.1'
+      - run: composer validate --strict --no-check-lock
+
+  static_analysis:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          coverage: none
+          php-version: '8.2'
+      - name: Install dependencies
+        run: composer update --ansi --no-progress --prefer-dist --no-interaction
+      - run: vendor/bin/phpstan analyze
 
   tests:
     name: Tests
@@ -58,36 +58,36 @@ jobs:
         php:
           - ${{ fromJSON(needs.defaults.outputs.php) }}
         browser:
-#          - 'firefox'
+          - 'firefox'
           - 'chrome'
         selenium:
-#          - '2.53.1'
+          - '2.53.1'
           - '3'
-#          - '4'
+          - '4'
         include:
           # Check on different PHP versions
-#          - php: '7.4'
-#            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
-#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
-#          - php: '8.0'
-#            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
-#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
-#          - php: '8.1'
-#            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
-#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
-#          - php: '8.2'
-#            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
-#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '7.4'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.0'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.1'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.2'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           - php: '8.3'
             browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
             selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           # Check less-common browsers
-#          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
-#            browser: 'edge'
-#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
-#          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
-#            browser: 'chromium'
-#            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
+            browser: 'edge'
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: ${{ fromJSON(needs.defaults.outputs.php) }}
+            browser: 'chromium'
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
       fail-fast: false
 
     steps:
@@ -121,15 +121,6 @@ jobs:
           curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:4444/wd/hub/status
           curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:8002/
 
-#      - name: Setup upterm session
-#        uses: lhotari/action-upterm@v1
-#        env:
-#          SELENIUM_VERSION: ${{ matrix.selenium }}
-#          DRIVER_URL: http://localhost:4444/wd/hub
-#          WEB_FIXTURES_HOST: http://host.docker.internal:8002
-#          WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
-#          DRIVER_MACHINE_BASE_PATH: /fixtures/
-
       - name: Run tests
         env:
           SELENIUM_VERSION: ${{ matrix.selenium }}
@@ -138,7 +129,7 @@ jobs:
           WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
           DRIVER_MACHINE_BASE_PATH: /fixtures/
         run: |
-          vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox --filter TimeoutTest
+          vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
