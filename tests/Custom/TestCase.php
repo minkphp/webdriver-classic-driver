@@ -4,13 +4,14 @@ namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
-use Symfony\Bridge\PhpUnit\ExpectDeprecationTrait;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     protected WebdriverClassicDriver $driver;
 
-    use ExpectDeprecationTrait;
+    public function expectDeprecation(string $message = null): void
+    {
+    }
 
     protected function setUp(): void
     {
