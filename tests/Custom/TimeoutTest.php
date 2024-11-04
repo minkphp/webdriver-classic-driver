@@ -42,6 +42,7 @@ class TimeoutTest extends TestCase
     {
         $this->driver->start();
         $this->driver->setTimeouts(['page' => 500]);
+        $this->driver->setTimeouts(['page' => 500]);
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Page failed to load: ');
