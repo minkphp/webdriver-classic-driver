@@ -119,8 +119,7 @@ jobs:
       - name: Wait for Selenium Server and Web Server to start
         run: |
           curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:4444/wd/hub/status
-          cat ./logs/mink-test-server.log
-          while ! nc -z localhost 8002 </dev/null; do echo Waiting for PHP server to start...; sleep 1; done
+          curl --retry 5 --retry-all-errors --retry-delay 1 --max-time 10 --head -X GET http://localhost:8002/
 
 #      - name: Setup upterm session
 #        uses: lhotari/action-upterm@v1
