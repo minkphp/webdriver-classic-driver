@@ -10,6 +10,7 @@ services:
       SCREEN_WIDTH: 1024
       SCREEN_HEIGHT: 768
       START_XVFB: false
+      SE_START_XVFB: false
     volumes:
       - /dev/shm:/dev/shm
       - ./vendor/mink/driver-testsuite/web-fixtures:/fixtures

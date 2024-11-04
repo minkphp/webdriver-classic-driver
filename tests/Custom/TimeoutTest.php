@@ -38,7 +38,7 @@ class TimeoutTest extends TestCase
         $this->assertNotEmpty($this->driver->getText('//div[@id="waitable"]/div'));
     }
 
-    /*public function testShortPageLoadTimeoutThrowsException(): void
+    public function testShortPageLoadTimeoutThrowsException(): void
     {
         $this->driver->start();
         $this->driver->setTimeouts(['page' => 500]);
@@ -47,35 +47,27 @@ class TimeoutTest extends TestCase
         $this->expectExceptionMessage('Page failed to load: ');
 
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
-    }*/
+    }
 
     /**
      * @group legacy
+     * @dataProvider deprecatedPageLoadDataProvider
      */
-    public function testDeprecatedShortPageLoadTimeoutThrowsException1(): void
+    public function testDeprecatedShortPageLoadTimeoutThrowsException(string $type): void
     {
         $this->driver->start();
 
-        $this->expectDeprecation('Using "pageLoad" timeout type is deprecated, please use "page" instead');
-        $this->driver->setTimeouts(['pageLoad' => 500]);
+        $this->expectDeprecation('Using "' . $type . '" timeout type is deprecated, please use "page" instead');
+        $this->driver->setTimeouts([$type => 500]);
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Page failed to load: ');
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 
-    /**
-     * @group legacy
-     */
-    public function testDeprecatedShortPageLoadTimeoutThrowsException2(): void
+    public static function deprecatedPageLoadDataProvider(): iterable
     {
-        $this->driver->start();
-
-        $this->expectDeprecation('Using "page load" timeout type is deprecated, please use "page" instead');
-        $this->driver->setTimeouts(['page load' => 500]);
-
-        $this->expectException(DriverException::class);
-        $this->expectExceptionMessage('Page failed to load: ');
-        $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
+        yield 'selenium 3 style' => ['type' => 'pageLoad'];
+        yield 'selenium 2 style' => ['type' => 'page load'];
     }
 }
