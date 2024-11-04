@@ -22,7 +22,7 @@ jobs:
         run: |
           echo 'php="8.3"' >> "$GITHUB_OUTPUT"
           echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
-          echo 'selenium="4"' >> "$GITHUB_OUTPUT"
+          echo 'selenium="3"' >> "$GITHUB_OUTPUT"
 
   check_composer:
     name: Check composer.json
