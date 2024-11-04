@@ -47,6 +47,15 @@ class WebdriverClassicDriver extends CoreDriver
             'goog:chromeOptions' => [
                 // disable "Chrome is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
+                'args' => [
+                    'no-first-run',
+                    'no-default-browser-check',
+                    'disable-dev-shm-usage',
+                    'ignore-certificate-errors',
+                    'window-size=1050,720',
+                    'disable-gpu',
+                    'headless=new',
+                ],
             ],
         ],
 
