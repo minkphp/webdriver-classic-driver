@@ -6,7 +6,7 @@ use Behat\Mink\Exception\DriverException;
 
 class TimeoutTest extends TestCase
 {
-     public function testInvalidTimeoutSettingThrowsException(): void
+    public function testInvalidTimeoutSettingThrowsException(): void
     {
         $this->driver->start();
 
