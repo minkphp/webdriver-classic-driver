@@ -26,6 +26,8 @@ class TestCase extends \PHPUnit\Framework\TestCase
         if ($this->driver->isStarted()) {
             $this->driver->stop();
         }
+
+        unset($this->driver);
     }
 
     protected function pathTo(string $path): string
