@@ -135,7 +135,7 @@ jobs:
         env:
           SELENIUM_VERSION: ${{ matrix.selenium }}
           DRIVER_URL: http://localhost:4444/wd/hub
-          WEB_FIXTURES_HOST: http://bbb-host.docker.internal:8002
+          WEB_FIXTURES_HOST: http://localhost:8002
           WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
           DRIVER_MACHINE_BASE_PATH: /fixtures/
         run: |
