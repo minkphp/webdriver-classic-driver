@@ -37,4 +37,16 @@ class TestCase extends \PHPUnit\Framework\TestCase
     {
         return WebdriverClassicConfig::getInstance();
     }
+
+    /**
+     * @before
+     *
+     * @return void
+     */
+    protected function checkSkippedTest()
+    {
+        if (null !== $message = self::getConfig()->skipMessage(get_class($this), $this->getName(false))) {
+            $this->markTestSkipped($message);
+        }
+    }
 }
