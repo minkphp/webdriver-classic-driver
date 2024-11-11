@@ -8,6 +8,7 @@ use Behat\Mink\Tests\Driver\Basic\HeaderTest;
 use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
 use Behat\Mink\Tests\Driver\Js\EventsTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
+use Mink\WebdriverClassicDriver\Tests\Custom\TimeoutTest;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebdriverClassicConfig extends AbstractConfig
@@ -57,6 +58,12 @@ class WebdriverClassicConfig extends AbstractConfig
 
             case $testCase === EventsTest::class && $test === 'testKeyboardEvents' && $this->isOldChrome():
                 return 'Old Chrome does not allow triggering events.';
+
+            case $testCase === TimeoutTest::class && $this->getBrowserName() === 'chrome':
+                if ($test === 'testDeprecatedShortPageLoadTimeoutThrowsException') {
+                    return 'Attempt to set "pageLoad" timeout for Google Chrome causes a freeze.';
+                }
+                // no break
 
             default:
                 return parent::skipMessage($testCase, $test);
