@@ -6,17 +6,6 @@ use Behat\Mink\Exception\DriverException;
 
 class TimeoutTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        $this->driver->setTimeouts([
-            'script' => 30000,
-            'page' => 300000,
-            'implicit' => 0,
-        ]);
-
-        parent::tearDown();
-    }
-
     public function testInvalidTimeoutSettingThrowsException(): void
     {
         $this->driver->start();
@@ -58,5 +47,27 @@ class TimeoutTest extends TestCase
         $this->expectExceptionMessage('Page failed to load: ');
 
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
+    }
+
+    /**
+     * @group legacy
+     * @dataProvider deprecatedPageLoadDataProvider
+     */
+    public function testDeprecatedShortPageLoadTimeoutThrowsException(string $type): void
+    {
+        $this->driver->start();
+
+        $this->expectDeprecation('Using "' . $type . '" timeout type is deprecated, please use "page" instead');
+        $this->driver->setTimeouts([$type => 500]);
+
+        $this->expectException(DriverException::class);
+        $this->expectExceptionMessage('Page failed to load: ');
+        $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
+    }
+
+    public static function deprecatedPageLoadDataProvider(): iterable
+    {
+        yield 'selenium 3 style' => ['type' => 'pageLoad'];
+        yield 'selenium 2 style' => ['type' => 'page load'];
     }
 }

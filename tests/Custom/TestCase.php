@@ -43,7 +43,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function checkSkippedTest(): void
     {
-        $message = self::getConfig()->skipMessage(get_class($this), $this->getName(false));
+        $message = $this->getConfig()->skipMessage(static::class, $this->getName(false));
 
         if (null !== $message) {
             $this->markTestSkipped($message);
