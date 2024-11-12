@@ -65,11 +65,9 @@ class TimeoutTest extends TestCase
         $this->driver->visit($this->pathTo('/page_load.php?sleep=2'));
     }
 
-    public static function deprecatedPageLoadDataProvider(): array
+    public static function deprecatedPageLoadDataProvider(): iterable
     {
-        return [
-            'selenium 3 style' => ['type' => 'pageLoad'],
-            'selenium 2 style' => ['type' => 'page load'],
-        ];
+        yield 'selenium 3 style' => ['type' => 'pageLoad'];
+        yield 'selenium 2 style' => ['type' => 'page load'];
     }
 }

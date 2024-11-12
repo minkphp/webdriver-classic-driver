@@ -44,7 +44,8 @@ class WebdriverClassicConfig extends AbstractConfig
     public function skipMessage($testCase, $test): ?string
     {
         switch (true) {
-            case $testCase === WindowTest::class && $test === 'testWindowMaximize' && $this->isXvfb():
+            case [$testCase, $test] === [WindowTest::class, 'testWindowMaximize']
+                && $this->isXvfb():
                 return 'Maximizing the window does not work when running the browser in Xvfb.';
 
             case $testCase === BasicAuthTest::class:
@@ -56,23 +57,20 @@ class WebdriverClassicConfig extends AbstractConfig
             case $testCase === StatusCodeTest::class:
                 return 'Checking status code is not supported.';
 
-            case $testCase === EventsTest::class && $test === 'testKeyboardEvents' && $this->isOldChrome():
+            case [$testCase, $test] === [EventsTest::class, 'testKeyboardEvents']
+                && $this->isOldChrome():
                 return 'Old Chrome does not allow triggering events.';
 
-            case $testCase === TimeoutTest::class && $this->getBrowserName() !== 'firefox':
-                if ($test === 'testDeprecatedShortPageLoadTimeoutThrowsException' && $this->isXvfb()) {
-                    return 'Attempt to set page load timeout several times causes a freeze in this browser.';
-                }
-                // no break
+            case [$testCase, $test] === [TimeoutTest::class, 'testDeprecatedShortPageLoadTimeoutThrowsException']
+                && in_array($this->getBrowserName(), ['chrome', 'chromium', 'edge'])
+                && $this->isXvfb():
+                return 'Attempt to set page load timeout several times causes a freeze in this browser.';
 
             default:
                 return parent::skipMessage($testCase, $test);
         }
     }
 
-    /**
-     * {@inheritdoc}
-     */
     protected function supportsCss(): bool
     {
         return true;
