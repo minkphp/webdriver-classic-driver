@@ -7,6 +7,7 @@ use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
 use Behat\Mink\Tests\Driver\Basic\HeaderTest;
 use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
 use Behat\Mink\Tests\Driver\Js\EventsTest;
+use Behat\Mink\Tests\Driver\Js\JavascriptTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
@@ -57,6 +58,21 @@ class WebdriverClassicConfig extends AbstractConfig
 
             case $testCase === EventsTest::class && $test === 'testKeyboardEvents' && $this->isOldChrome():
                 return 'Old Chrome does not allow triggering events.';
+
+            case $testCase === TimeoutTest::class && $this->getBrowserName() !== 'firefox':
+                if ($test === 'testDeprecatedShortPageLoadTimeoutThrowsException' && $this->isXvfb()) {
+                    return 'Attempt to set page load timeout several times causes a freeze in this browser.';
+                }
+                // no break
+
+            case [JavascriptTest::class, 'testDragDropOntoHiddenItself'] === [$testCase, $test]:
+                $seleniumVersion = $_SERVER['SELENIUM_VERSION'] ?? null;
+                $browser = $_SERVER['WEB_FIXTURES_BROWSER'] ?? null;
+
+                if ($seleniumVersion && version_compare($seleniumVersion, '3.0.0', '<') && $browser === 'firefox') {
+                    return 'The Firefox browser compatible with Selenium Server 2.x doesn\'t fully implement drag-n-drop support.';
+                }
+                // no break
 
             default:
                 return parent::skipMessage($testCase, $test);
