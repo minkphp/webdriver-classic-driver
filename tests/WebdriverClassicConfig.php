@@ -60,7 +60,7 @@ class WebdriverClassicConfig extends AbstractConfig
                 return 'Old Chrome does not allow triggering events.';
 
             case $testCase === TimeoutTest::class && $this->getBrowserName() !== 'firefox':
-                if ($test === 'testDeprecatedShortPageLoadTimeoutThrowsException') {
+                if ($test === 'testDeprecatedShortPageLoadTimeoutThrowsException' && $this->isXvfb()) {
                     return 'Attempt to set page load timeout several times causes a freeze in this browser.';
                 }
                 // no break
