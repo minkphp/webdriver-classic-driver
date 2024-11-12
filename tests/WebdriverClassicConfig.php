@@ -7,6 +7,7 @@ use Behat\Mink\Tests\Driver\Basic\BasicAuthTest;
 use Behat\Mink\Tests\Driver\Basic\HeaderTest;
 use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
 use Behat\Mink\Tests\Driver\Js\EventsTest;
+use Behat\Mink\Tests\Driver\Js\JavascriptTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
 use Mink\WebdriverClassicDriver\Tests\Custom\TimeoutTest;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
@@ -65,6 +66,10 @@ class WebdriverClassicConfig extends AbstractConfig
                 && ($this->isChromiumBased() || $this->isOldFirefox())
                 && $this->isXvfb():
                 return 'Setting page load timeout several times causes a freeze in this browser.';
+
+            case [$testCase, $test] === [JavascriptTest::class, 'testDragDropOntoHiddenItself']
+                && $this->isOldFirefox():
+                return 'The Firefox browser compatible with Selenium Server 2.x does not fully implement drag-n-drop support.';
 
             default:
                 return parent::skipMessage($testCase, $test);
