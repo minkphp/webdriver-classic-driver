@@ -62,9 +62,9 @@ class WebdriverClassicConfig extends AbstractConfig
                 return 'Old Chrome does not allow triggering events.';
 
             case [$testCase, $test] === [TimeoutTest::class, 'testDeprecatedShortPageLoadTimeoutThrowsException']
-                && in_array($this->getBrowserName(), ['chrome', 'chromium', 'edge'])
+                && ($this->isChromiumBased() || $this->isOldFirefox())
                 && $this->isXvfb():
-                return 'Attempt to set page load timeout several times causes a freeze in this browser.';
+                return 'Setting page load timeout several times causes a freeze in this browser.';
 
             default:
                 return parent::skipMessage($testCase, $test);
@@ -85,5 +85,16 @@ class WebdriverClassicConfig extends AbstractConfig
     {
         return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
             && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
+    }
+
+    private function isOldFirefox(): bool
+    {
+        return getenv('WEB_FIXTURES_BROWSER') === 'firefox'
+            && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
+    }
+
+    private function isChromiumBased(): bool
+    {
+        return in_array($this->getBrowserName(), ['chrome', 'chromium', 'edge']);
     }
 }
