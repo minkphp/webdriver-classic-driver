@@ -121,15 +121,22 @@ jobs:
           WEB_FIXTURES_BROWSER: ${{ matrix.browser }}
           DRIVER_MACHINE_BASE_PATH: /fixtures/
         run: |
-          vendor/bin/phpunit -v --coverage-clover=coverage.xml --colors=always --testdox
+          vendor/bin/phpunit -v --coverage-clover=coverage.xml --log-junit junit.xml --colors=always --testdox
 
-      - name: Upload coverage
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
-        # See https://github.com/nektos/act#skipping-steps
-        if: ${{ !env.ACT }}
+        # See https://nektosact.com/usage/index.html#skipping-steps
+        if: ${{ !env.ACT && !cancelled() }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
+
+      - name: Upload test results to Codecov
+        # See https://nektosact.com/usage/index.html#skipping-steps
+        if: ${{ !env.ACT && !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Extract docker logs
         if: ${{ failure() }}
