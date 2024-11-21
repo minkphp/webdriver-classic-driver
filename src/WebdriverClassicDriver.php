@@ -762,7 +762,7 @@ class WebdriverClassicDriver extends CoreDriver
             throw new DriverException('Base driver has already been created');
         }
 
-        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
+        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->getDesiredCapabilities());
     }
 
     /**
@@ -775,6 +775,11 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         throw new DriverException('Base driver has not been created');
+    }
+
+    protected function getDesiredCapabilities(): array
+    {
+        return $this->desiredCapabilities->toArray();
     }
 
     private function getNormalisedBrowserName(): string
