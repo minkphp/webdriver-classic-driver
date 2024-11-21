@@ -82,7 +82,7 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
     /**
      * @param string $browserName
      * @param array<string, mixed> $desiredCapabilities
-     * @return WebdriverClassicDriver&object{capabilities: array<string, mixed>}
+     * @return WebdriverClassicDriver&object{capabilities: null|array<string, mixed>}
      */
     private function createDriverExposingCapabilities(string $browserName, array $desiredCapabilities = []): WebdriverClassicDriver
     {
