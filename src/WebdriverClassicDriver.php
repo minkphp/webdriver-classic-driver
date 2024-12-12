@@ -47,6 +47,10 @@ class WebdriverClassicDriver extends CoreDriver
             'goog:chromeOptions' => [
                 // disable "Chrome is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
+                'args' => array(
+                    // disable browser folder cloning on Mac, when tests are executed
+                    'disable-features=MacAppCodeSignClone',
+                ),
             ],
         ],
 
