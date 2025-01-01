@@ -31,6 +31,11 @@ use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
 
+/**
+ * @phpstan-type TTimeouts array{script?: null|numeric, implicit?: null|numeric, page?: null|numeric, "page load"?: null|numeric, pageLoad?: null|numeric}
+ * @phpstan-type TCapabilities array<string, mixed>
+ * @phpstan-type TElementValue array<array-key, mixed>|bool|mixed|string|null
+ */
 class WebdriverClassicDriver extends CoreDriver
 {
     public const DEFAULT_BROWSER = WebDriverBrowserType::CHROME;
@@ -78,7 +83,7 @@ class WebdriverClassicDriver extends CoreDriver
     private DesiredCapabilities $desiredCapabilities;
 
     /**
-     * @var array{script?: null|numeric, implicit?: null|numeric, page?: null|numeric}
+     * @var TTimeouts
      */
     private array $timeouts = [];
 
@@ -88,7 +93,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
-     * @param array<string, mixed> $desiredCapabilities
+     * @param TCapabilities $desiredCapabilities
      */
     public function __construct(
         string $browserName = self::DEFAULT_BROWSER,
@@ -335,7 +340,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @return array<array-key, mixed>|bool|mixed|string|null
+     * @return TElementValue
      */
     public function getValue(
         #[Language('XPath')]
@@ -378,7 +383,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param array<array-key, mixed>|bool|mixed|string|null $value
+     * @param TElementValue $value
      */
     public function setValue(
         #[Language('XPath')]
@@ -654,10 +659,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->executeScript($script);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return mixed
-     */
     public function evaluateScript(
         #[Language('JavaScript')]
         string $script
@@ -747,7 +748,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Sets the timeouts to apply to the webdriver session
      *
-     * @param array{script?: numeric, implicit?: numeric, page?: numeric} $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
+     * @param TTimeouts $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
      * @throws DriverException
      * @api
      */
@@ -796,7 +797,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Detect and assign appropriate browser capabilities
      *
-     * @param array<string, mixed> $desiredCapabilities
+     * @param TCapabilities $desiredCapabilities
      *
      * @see https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
      */
@@ -924,12 +925,15 @@ class WebdriverClassicDriver extends CoreDriver
      * Executes JS on a given element - pass in a js script string and argument[0] will
      * be replaced with a reference to the result of the $xpath query
      *
+     * Example:
+     * ```
+     * $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
+     * ```
+     *
      * @param string $xpath the xpath to search with
      * @param string $script the script to execute
-     *
      * @return mixed
      * @throws DriverException
-     * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnXpath(
         #[Language('XPath')]
@@ -943,11 +947,15 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Executes JS on a given element - pass in a js script string and argument[0] will contain a reference to the element
      *
+     * Example:
+     * ```
+     * $this->executeJsOnElement($element, 'return argument[0].childNodes.length');
+     * ```
+     *
      * @param RemoteWebElement $element the webdriver element
      * @param string $script the script to execute
      * @return mixed
      * @throws DriverException
-     * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnElement(
         RemoteWebElement $element,
