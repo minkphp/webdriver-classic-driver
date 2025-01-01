@@ -1242,12 +1242,13 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * @param mixed $value
+     * @throws DriverException
      */
     private function getAsString($value, string $name): string
     {
         if (!is_scalar($value)) {
             $actualType = gettype($value);
-            throw new \RuntimeException(
+            throw new DriverException(
                 "$name should be a string or at least a scalar value, but received `$actualType` instead"
             );
         }
