@@ -774,7 +774,7 @@ class WebdriverClassicDriver extends CoreDriver
             throw new DriverException('Base driver has already been created');
         }
 
-        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->desiredCapabilities);
+        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->getDesiredCapabilities());
     }
 
     /**
@@ -787,6 +787,11 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         throw new DriverException('Base driver has not been created');
+    }
+
+    protected function getDesiredCapabilities(): array
+    {
+        return $this->desiredCapabilities->toArray();
     }
 
     private function getNormalisedBrowserName(): string
@@ -803,29 +808,22 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function initCapabilities(array $desiredCapabilities): DesiredCapabilities
     {
-        // Build base capabilities
-        $caps = $this->getBrowserSpecificCapabilities() ?? new DesiredCapabilities();
+        $capabilities = $this->createBrowserSpecificCapabilities();
 
-        // Set defaults
-        $defaults = array_merge(
-            self::DEFAULT_CAPABILITIES['default'],
-            self::DEFAULT_CAPABILITIES[$this->getNormalisedBrowserName()] ?? []
-        );
-        foreach ($defaults as $key => $value) {
-            if ($caps->getCapability($key) === null) {
-                $caps->setCapability($key, $value);
-            }
+        foreach (
+            array_merge(
+                self::DEFAULT_CAPABILITIES['default'],
+                self::DEFAULT_CAPABILITIES[$this->getNormalisedBrowserName()] ?? [],
+                $desiredCapabilities,
+            ) as $capabilityKey => $capabilityValue
+        ) {
+            $capabilities->setCapability($capabilityKey, $capabilityValue);
         }
 
-        // Merge in other requested types
-        foreach ($desiredCapabilities as $key => $value) {
-            $caps->setCapability($key, $value);
-        }
-
-        return $caps;
+        return $capabilities;
     }
 
-    private function getBrowserSpecificCapabilities(): ?DesiredCapabilities
+    private function createBrowserSpecificCapabilities(): DesiredCapabilities
     {
         switch ($this->getNormalisedBrowserName()) {
             case WebDriverBrowserType::FIREFOX:
@@ -869,7 +867,7 @@ class WebdriverClassicDriver extends CoreDriver
             case WebDriverBrowserType::MOCK:
             case WebDriverBrowserType::IE_HTA:
             default:
-                return null;
+                return new DesiredCapabilities();
         }
     }
 
