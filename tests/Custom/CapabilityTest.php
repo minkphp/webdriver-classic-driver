@@ -11,8 +11,8 @@ use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 class CapabilityTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @param array<string, mixed> $desiredCapabilities
-     * @param array<string, mixed> $expectedCapabilities
+     * @param TCapabilities $desiredCapabilities
+     * @param TCapabilities $expectedCapabilities
      *
      * @dataProvider capabilitiesDataProvider
      */
