@@ -2,6 +2,7 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
+use Mink\WebdriverClassicDriver\Tests\DriverExposingCapabilities;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 /**
@@ -17,9 +18,9 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
      */
     public function testThatCapabilitiesAreAsExpected(string $browserName, array $desiredCapabilities, array $expectedCapabilities): void
     {
-        $driver = $this->createDriverExposingCapabilities($browserName, $desiredCapabilities);
+        $driver = new DriverExposingCapabilities($browserName, $desiredCapabilities);
 
-        $this->assertSame($expectedCapabilities, $driver->capabilities);
+        $this->assertSame($expectedCapabilities, $driver->getDesiredCapabilities());
     }
 
     /**
@@ -83,29 +84,5 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
                 'goog:chromeOptions' => ['args' => ['a', 'b', 'c']],
             ],
         ];
-    }
-
-    /**
-     * @param TCapabilities $desiredCapabilities
-     * @return WebdriverClassicDriver&object{capabilities: TCapabilities}
-     */
-    private function createDriverExposingCapabilities(string $browserName, array $desiredCapabilities): WebdriverClassicDriver
-    {
-        return new class($browserName, $desiredCapabilities) extends WebdriverClassicDriver {
-            /**
-             * @var array<string, mixed>
-             */
-            public array $capabilities;
-
-            /**
-             * @param array<string, mixed> $desiredCapabilities
-             */
-            public function __construct(string $browserName, array $desiredCapabilities)
-            {
-                parent::__construct($browserName, $desiredCapabilities);
-
-                $this->capabilities = $this->getDesiredCapabilities();
-            }
-        };
     }
 }
