@@ -5,8 +5,9 @@ parameters:
         - tests
     treatPhpDocTypesAsCertain: false
     stubFiles:
-        - stubs/WebDriverTimeouts.stub
+        - stubs/DesiredCapabilities.stub
         - stubs/RemoteWebDriver.stub
+        - stubs/WebDriverTimeouts.stub
 
 includes:
     - vendor/phpstan/phpstan-phpunit/extension.neon

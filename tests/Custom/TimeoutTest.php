@@ -66,7 +66,7 @@ class TimeoutTest extends TestCase
     }
 
     /**
-     * @return iterable<array{type: string}>
+     * @return iterable<string, array{type: string}>
      */
     public static function deprecatedPageLoadDataProvider(): iterable
     {
