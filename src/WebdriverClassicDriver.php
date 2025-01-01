@@ -670,10 +670,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->executeScript($script);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return mixed
-     */
     public function evaluateScript(
         #[Language('JavaScript')]
         string $script
@@ -971,7 +967,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @throws DriverException
      */
     private function executeJsOnElement(
-        RemoteWebElement $element,
+        WebDriverElement $element,
         #[Language('JavaScript')]
         string $script
     ) {
@@ -1044,7 +1040,7 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    private function clickOnElement(RemoteWebElement $element): void
+    private function clickOnElement(WebDriverElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
         $element->click();
@@ -1108,14 +1104,11 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function findElement(
         #[Language('XPath')]
-        string $xpath,
-        ?RemoteWebElement $parent = null
+        string $xpath
     ): RemoteWebElement {
         try {
             $finder = WebDriverBy::xpath($xpath);
-            return $parent
-                ? $parent->findElement($finder)
-                : $this->getWebDriver()->findElement($finder);
+            return $this->getWebDriver()->findElement($finder);
         } catch (\Throwable $e) {
             throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
         }
@@ -1124,7 +1117,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * @throws DriverException
      */
-    private function selectRadioValue(RemoteWebElement $element, string $value): void
+    private function selectRadioValue(WebDriverElement $element, string $value): void
     {
         try {
             (new WebDriverRadios($element))->selectByValue($value);
@@ -1142,7 +1135,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * @throws DriverException
      */
-    private function selectOptionOnElement(RemoteWebElement $element, string $value, bool $multiple = false): void
+    private function selectOptionOnElement(WebDriverElement $element, string $value, bool $multiple = false): void
     {
         try {
             $select = new WebDriverSelect($element);
@@ -1172,7 +1165,7 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * @throws DriverException
      */
-    private function deselectAllOptions(RemoteWebElement $element): void
+    private function deselectAllOptions(WebDriverElement $element): void
     {
         try {
             (new WebDriverSelect($element))->deselectAll();
@@ -1190,7 +1183,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @throws DriverException
      */
     private function ensureInputType(
-        RemoteWebElement $element,
+        WebDriverElement $element,
         #[Language('XPath')]
         string $xpath,
         string $type,
@@ -1233,7 +1226,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @param mixed $value
      * @throws DriverException
      */
-    private function setElementDomProperty(RemoteWebElement $element, string $property, $value): void
+    private function setElementDomProperty(WebDriverElement $element, string $property, $value): void
     {
         $this->executeJsOnElement(
             $element,
