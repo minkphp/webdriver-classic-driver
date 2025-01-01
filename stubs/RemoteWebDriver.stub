@@ -1,0 +1,11 @@
+<?php
+
+namespace Facebook\WebDriver\Remote;
+
+interface RemoteWebDriver
+{
+    /**
+     * @return list<string>
+     */
+    public function getWindowHandles(): array;
+}
