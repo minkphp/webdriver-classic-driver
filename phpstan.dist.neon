@@ -1,14 +1,41 @@
-parameters:
-    level: 10
-    paths:
-        - src
-        - tests
-    treatPhpDocTypesAsCertain: false
-    stubFiles:
-        - stubs/DesiredCapabilities.stub
-        - stubs/RemoteWebDriver.stub
-        - stubs/WebDriverTimeouts.stub
-
 includes:
-    - vendor/phpstan/phpstan-phpunit/extension.neon
-    - vendor/phpstan/phpstan-phpunit/rules.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
+	- vendor/phpstan/phpstan-phpunit/rules.neon
+
+parameters:
+	level: 10
+	paths:
+		- src
+		- tests
+	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		-
+			message: '#^Method Mink\\WebdriverClassicDriver\\WebdriverClassicDriver\:\:getDesiredCapabilities\(\) should return array\<string, mixed\> but returns array\.$#'
+			identifier: return.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Method Mink\\WebdriverClassicDriver\\WebdriverClassicDriver\:\:getWindowHandleFromName\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Parameter \#1 \$handle of method Facebook\\WebDriver\\Remote\\RemoteTargetLocator\:\:window\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:implicitlyWait\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:pageLoadTimeout\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:setScriptTimeout\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/WebdriverClassicDriver.php

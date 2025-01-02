@@ -4,7 +4,6 @@
 /.gitignore                 export-ignore
 /phpstan*.neon              export-ignore
 /phpunit.xml.dist           export-ignore
-/stubs                      export-ignore
 /tests                      export-ignore
 /README.md                  export-ignore
 /resources/get-syn.php      export-ignore

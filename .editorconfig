@@ -14,3 +14,6 @@ indent_size = 2
 
 [*.php]
 ij_php_align_multiline_parameters = false
+
+[*.neon]
+indent_style = tab
