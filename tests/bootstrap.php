@@ -4,11 +4,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Symfony\Component\Process\Process;
 
-$fixturesHost = $_SERVER['WEB_FIXTURES_HOST'] ?? '//host:8002';
-if (!is_string($fixturesHost)) {
-    throw new RuntimeException('The fixtures host must be specified in $_SERVER[WEB_FIXTURES_HOST] as a string');
-}
-$minkTestServerPort = parse_url($fixturesHost, PHP_URL_PORT);
+$fixturesHost = $_SERVER['WEB_FIXTURES_HOST'] ?? '';
+$minkTestServerPort = parse_url(is_string($fixturesHost) ? $fixturesHost : '', PHP_URL_PORT) ?: '8002';
 
 $minkTestServer = new Process([
     PHP_BINARY,
