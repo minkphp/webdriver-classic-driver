@@ -2,7 +2,9 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
-use Mink\WebdriverClassicDriver\Tests\DriverExposingCapabilities;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverOptions;
+use Facebook\WebDriver\WebDriverTimeouts;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 /**
@@ -18,9 +20,26 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
      */
     public function testThatCapabilitiesAreAsExpected(string $browserName, array $desiredCapabilities, array $expectedCapabilities): void
     {
-        $driver = new DriverExposingCapabilities($browserName, $desiredCapabilities);
+        $mockWebDriver = $this->createMock(RemoteWebDriver::class);
+        $mockWebDriverOptions = $this->createMock(WebDriverOptions::class);
+        $mockWebDriverTimeouts = $this->createMock(WebDriverTimeouts::class);
+        $mockWebDriver->method('manage')->willReturn($mockWebDriverOptions);
+        $mockWebDriverOptions->method('timeouts')->willReturn($mockWebDriverTimeouts);
 
-        $this->assertSame($expectedCapabilities, $driver->getDesiredCapabilities());
+        $actualCapabilities = null;
+        $driver = new WebdriverClassicDriver(
+            $browserName,
+            $desiredCapabilities,
+            'example.com',
+            function ($host, $capabilities) use (&$actualCapabilities, $mockWebDriver) {
+                $actualCapabilities = $capabilities->toArray();
+                return $mockWebDriver;
+            }
+        );
+
+        $driver->start();
+
+        $this->assertSame($expectedCapabilities, $actualCapabilities);
     }
 
     /**

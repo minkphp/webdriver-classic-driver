@@ -10,11 +10,6 @@ parameters:
 	treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		-
-			message: '#^Method Mink\\WebdriverClassicDriver\\WebdriverClassicDriver\:\:getDesiredCapabilities\(\) should return array\<string, mixed\> but returns array\.$#'
-			identifier: return.type
-			count: 1
-			path: src/WebdriverClassicDriver.php
-		-
 			message: '#^Method Mink\\WebdriverClassicDriver\\WebdriverClassicDriver\:\:getWindowHandleFromName\(\) should return string but returns mixed\.$#'
 			identifier: return.type
 			count: 1
