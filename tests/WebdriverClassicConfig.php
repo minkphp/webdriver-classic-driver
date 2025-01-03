@@ -21,7 +21,10 @@ class WebdriverClassicConfig extends AbstractConfig
 
     public function createDriver(): WebdriverClassicDriver
     {
-        $seleniumHost = $_SERVER['DRIVER_URL'];
+        $seleniumHost = $_SERVER['DRIVER_URL'] ?? null;
+        if (!is_string($seleniumHost)) {
+            throw new \RuntimeException('Selenium host must be specified (as a string) in $_SERVER[DRIVER_URL].');
+        }
 
         return new WebdriverClassicDriver($this->getBrowserName(), [], $seleniumHost);
     }

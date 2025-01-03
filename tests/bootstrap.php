@@ -4,9 +4,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 use Symfony\Component\Process\Process;
 
-$minkTestServerPort = isset($_SERVER['WEB_FIXTURES_HOST'])
-    ? parse_url($_SERVER['WEB_FIXTURES_HOST'], PHP_URL_PORT)
-    : '8002';
+$fixturesHost = $_SERVER['WEB_FIXTURES_HOST'] ?? '';
+$minkTestServerPort = parse_url(is_string($fixturesHost) ? $fixturesHost : '', PHP_URL_PORT) ?: '8002';
 
 $minkTestServer = new Process([
     PHP_BINARY,

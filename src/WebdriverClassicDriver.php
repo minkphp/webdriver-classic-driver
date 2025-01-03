@@ -31,6 +31,12 @@ use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
 
+/**
+ * @phpstan-type TTimeouts array{script?: null|numeric, implicit?: null|numeric, page?: null|numeric, "page load"?: null|numeric, pageLoad?: null|numeric}
+ * @phpstan-type TCapabilities array<string, mixed>
+ * @phpstan-type TElementValue array<array-key, mixed>|bool|mixed|string|null
+ * @phpstan-type TDriverInstantiator callable(string $driverHost, DesiredCapabilities $capabilities): RemoteWebDriver
+ */
 class WebdriverClassicDriver extends CoreDriver
 {
     public const DEFAULT_BROWSER = WebDriverBrowserType::CHROME;
@@ -77,6 +83,9 @@ class WebdriverClassicDriver extends CoreDriver
 
     private DesiredCapabilities $desiredCapabilities;
 
+    /**
+     * @var TTimeouts
+     */
     private array $timeouts = [];
 
     private string $webDriverHost;
@@ -84,16 +93,25 @@ class WebdriverClassicDriver extends CoreDriver
     private ?string $initialWindowHandle = null;
 
     /**
+     * @var TDriverInstantiator
+     */
+    private $driverInstantiator;
+
+    /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
+     * @param TCapabilities $desiredCapabilities
+     * @param TDriverInstantiator $driverInstantiator
      */
     public function __construct(
         string $browserName = self::DEFAULT_BROWSER,
         array $desiredCapabilities = [],
-        string $webDriverHost = 'http://localhost:4444/wd/hub'
+        string $webDriverHost = 'http://localhost:4444/wd/hub',
+        ?callable $driverInstantiator = null
     ) {
         $this->browserName = $browserName;
         $this->desiredCapabilities = $this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
+        $this->driverInstantiator = $driverInstantiator ?? [self::class, 'instantiateWebDriver'];
     }
 
     // <editor-fold desc="Implementation">
@@ -262,7 +280,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function getWindowName(): string
     {
-        $name = (string)$this->evaluateScript('window.name');
+        $name = $this->getAsString($this->evaluateScript('window.name'), 'Window name');
 
         if ($name === '') {
             $name = self::W3C_WINDOW_HANDLE_PREFIX . $this->getWebDriver()->getWindowHandle();
@@ -299,7 +317,7 @@ class WebdriverClassicDriver extends CoreDriver
         return trim(str_replace(
             ["\r\n", "\r", "\n", "\xc2\xa0"],
             ' ',
-            $this->getElementDomProperty($this->findElement($xpath), 'innerText')
+            $this->getAsString($this->getElementDomProperty($this->findElement($xpath), 'innerText'), 'The element\'s innerText')
         ));
     }
 
@@ -307,14 +325,14 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->getElementDomProperty($this->findElement($xpath), 'innerHTML');
+        return $this->getAsString($this->getElementDomProperty($this->findElement($xpath), 'innerHTML'), 'The element\'s innerHTML');
     }
 
     public function getOuterHtml(
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->getElementDomProperty($this->findElement($xpath), 'outerHTML');
+        return $this->getAsString($this->getElementDomProperty($this->findElement($xpath), 'outerHTML'), 'The element\'s outerHTML');
     }
 
     public function getAttribute(
@@ -326,9 +344,14 @@ class WebdriverClassicDriver extends CoreDriver
         // so we cannot use webdriver api for this. See also: https://w3c.github.io/webdriver/#dfn-get-element-attribute
         $escapedName = $this->jsonEncode($name, 'get attribute', 'attribute name');
         $script = "return arguments[0].getAttribute($escapedName)";
-        return $this->executeJsOnXpath($xpath, $script);
+        $result = $this->executeJsOnXpath($xpath, $script);
+        return $result === null ? null : $this->getAsString($result, "The element's $name attribute");
     }
 
+    /**
+     * {@inheritdoc}
+     * @return TElementValue
+     */
     public function getValue(
         #[Language('XPath')]
         string $xpath
@@ -369,6 +392,10 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
+    /**
+     * {@inheritdoc}
+     * @param TElementValue $value
+     */
     public function setValue(
         #[Language('XPath')]
         string $xpath,
@@ -386,7 +413,7 @@ class WebdriverClassicDriver extends CoreDriver
                     if (is_array($value)) {
                         $this->deselectAllOptions($element);
                         foreach ($value as $option) {
-                            $this->selectOptionOnElement($element, $option, true);
+                            $this->selectOptionOnElement($element, $this->getAsString($option, 'Option value'), true);
                         }
                         return;
                     }
@@ -643,10 +670,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->getWebDriver()->executeScript($script);
     }
 
-    /**
-     * {@inheritdoc}
-     * @return mixed
-     */
     public function evaluateScript(
         #[Language('JavaScript')]
         string $script
@@ -736,7 +759,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Sets the timeouts to apply to the webdriver session
      *
-     * @param array $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
+     * @param TTimeouts $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
      * @throws DriverException
      * @api
      */
@@ -751,7 +774,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     // </editor-fold>
 
-    // <editor-fold desc="Private Utilities">
+    // <editor-fold desc="Extension Points">
 
     /**
      * @throws DriverException
@@ -762,7 +785,7 @@ class WebdriverClassicDriver extends CoreDriver
             throw new DriverException('Base driver has already been created');
         }
 
-        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->getDesiredCapabilities());
+        $this->webDriver = ($this->driverInstantiator)($this->webDriverHost, $this->desiredCapabilities);
     }
 
     /**
@@ -777,9 +800,13 @@ class WebdriverClassicDriver extends CoreDriver
         throw new DriverException('Base driver has not been created');
     }
 
-    protected function getDesiredCapabilities(): array
+    // </editor-fold>
+
+    // <editor-fold desc="Private Utilities">
+
+    private static function instantiateWebDriver(string $driverHost, DesiredCapabilities $capabilities): RemoteWebDriver
     {
-        return $this->desiredCapabilities->toArray();
+        return RemoteWebDriver::create($driverHost, $capabilities);
     }
 
     private function getNormalisedBrowserName(): string
@@ -789,6 +816,8 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * Detect and assign appropriate browser capabilities
+     *
+     * @param TCapabilities $desiredCapabilities
      *
      * @see https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
      */
@@ -909,12 +938,13 @@ class WebdriverClassicDriver extends CoreDriver
      * Executes JS on a given element - pass in a js script string and argument[0] will
      * be replaced with a reference to the result of the $xpath query
      *
-     * @param string $xpath the xpath to search with
-     * @param string $script the script to execute
+     * Example:
+     * ```
+     * $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
+     * ```
      *
      * @return mixed
      * @throws DriverException
-     * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnXpath(
         #[Language('XPath')]
@@ -928,14 +958,16 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Executes JS on a given element - pass in a js script string and argument[0] will contain a reference to the element
      *
-     * @param RemoteWebElement $element the webdriver element
-     * @param string $script the script to execute
+     * Example:
+     * ```
+     * $this->executeJsOnElement($element, 'return argument[0].childNodes.length');
+     * ```
+     *
      * @return mixed
      * @throws DriverException
-     * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnElement(
-        RemoteWebElement $element,
+        WebDriverElement $element,
         #[Language('JavaScript')]
         string $script
     ) {
@@ -1008,7 +1040,7 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    private function clickOnElement(RemoteWebElement $element): void
+    private function clickOnElement(WebDriverElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
         $element->click();
@@ -1072,14 +1104,11 @@ class WebdriverClassicDriver extends CoreDriver
      */
     private function findElement(
         #[Language('XPath')]
-        string $xpath,
-        ?RemoteWebElement $parent = null
+        string $xpath
     ): RemoteWebElement {
         try {
             $finder = WebDriverBy::xpath($xpath);
-            return $parent
-                ? $parent->findElement($finder)
-                : $this->getWebDriver()->findElement($finder);
+            return $this->getWebDriver()->findElement($finder);
         } catch (\Throwable $e) {
             throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
         }
@@ -1088,7 +1117,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * @throws DriverException
      */
-    private function selectRadioValue(RemoteWebElement $element, string $value): void
+    private function selectRadioValue(WebDriverElement $element, string $value): void
     {
         try {
             (new WebDriverRadios($element))->selectByValue($value);
@@ -1106,7 +1135,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * @throws DriverException
      */
-    private function selectOptionOnElement(RemoteWebElement $element, string $value, bool $multiple = false): void
+    private function selectOptionOnElement(WebDriverElement $element, string $value, bool $multiple = false): void
     {
         try {
             $select = new WebDriverSelect($element);
@@ -1136,7 +1165,7 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * @throws DriverException
      */
-    private function deselectAllOptions(RemoteWebElement $element): void
+    private function deselectAllOptions(WebDriverElement $element): void
     {
         try {
             (new WebDriverSelect($element))->deselectAll();
@@ -1154,7 +1183,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @throws DriverException
      */
     private function ensureInputType(
-        RemoteWebElement $element,
+        WebDriverElement $element,
         #[Language('XPath')]
         string $xpath,
         string $type,
@@ -1197,7 +1226,7 @@ class WebdriverClassicDriver extends CoreDriver
      * @param mixed $value
      * @throws DriverException
      */
-    private function setElementDomProperty(RemoteWebElement $element, string $property, $value): void
+    private function setElementDomProperty(WebDriverElement $element, string $property, $value): void
     {
         $this->executeJsOnElement(
             $element,
@@ -1223,6 +1252,22 @@ class WebdriverClassicDriver extends CoreDriver
             );
             throw new DriverException($message, 0, $e);
         }
+    }
+
+    /**
+     * @param mixed $value
+     * @throws DriverException
+     */
+    private function getAsString($value, string $name): string
+    {
+        if (!is_scalar($value)) {
+            $actualType = gettype($value);
+            throw new DriverException(
+                "$name should be a string or at least a scalar value, but received `$actualType` instead"
+            );
+        }
+
+        return (string)$value;
     }
 
     // </editor-fold>
