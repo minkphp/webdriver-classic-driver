@@ -7,11 +7,14 @@ use Facebook\WebDriver\WebDriverOptions;
 use Facebook\WebDriver\WebDriverTimeouts;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
+/**
+ * @phpstan-import-type TCapabilities from WebdriverClassicDriver
+ */
 class CapabilityTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @param array<string, mixed> $desiredCapabilities
-     * @param array<string, mixed> $expectedCapabilities
+     * @param TCapabilities $desiredCapabilities
+     * @param TCapabilities $expectedCapabilities
      *
      * @dataProvider capabilitiesDataProvider
      */
@@ -39,6 +42,9 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expectedCapabilities, $actualCapabilities);
     }
 
+    /**
+     * @return iterable<string, array{browserName: string, desiredCapabilities: TCapabilities, expectedCapabilities: TCapabilities}>
+     */
     public static function capabilitiesDataProvider(): iterable
     {
         yield 'unknown browser starts with default driver capabilities' => [

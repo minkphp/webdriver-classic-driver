@@ -32,6 +32,9 @@ use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
 
 /**
+ * @phpstan-type TTimeouts array{script?: null|numeric, implicit?: null|numeric, page?: null|numeric, "page load"?: null|numeric, pageLoad?: null|numeric}
+ * @phpstan-type TCapabilities array<string, mixed>
+ * @phpstan-type TElementValue array<array-key, mixed>|bool|mixed|string|null
  * @phpstan-type TWebDriverInstantiator callable(string $driverHost, DesiredCapabilities $capabilities): RemoteWebDriver
  */
 class WebdriverClassicDriver extends CoreDriver
@@ -80,6 +83,9 @@ class WebdriverClassicDriver extends CoreDriver
 
     private DesiredCapabilities $desiredCapabilities;
 
+    /**
+     * @var TTimeouts
+     */
     private array $timeouts = [];
 
     private string $webDriverHost;
@@ -93,6 +99,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
+     * @param TCapabilities $desiredCapabilities
      * @param TWebDriverInstantiator|null $webDriverInstantiator
      */
     public function __construct(
@@ -340,12 +347,16 @@ class WebdriverClassicDriver extends CoreDriver
         return $this->executeJsOnXpath($xpath, $script);
     }
 
+    /**
+     * {@inheritdoc}
+     * @return TElementValue
+     */
     public function getValue(
         #[Language('XPath')]
         string $xpath
     ) {
         $element = $this->findElement($xpath);
-        $widgetType = strtolower($element->getTagName() ?? '');
+        $widgetType = $element->getTagName();
         if ($widgetType === 'input') {
             $widgetType = strtolower((string)$element->getAttribute('type'));
         }
@@ -380,13 +391,17 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
+    /**
+     * {@inheritdoc}
+     * @param TElementValue $value
+     */
     public function setValue(
         #[Language('XPath')]
         string $xpath,
         $value
     ): void {
         $element = $this->findElement($xpath);
-        $widgetType = strtolower($element->getTagName() ?? '');
+        $widgetType = $element->getTagName();
         if ($widgetType === 'input') {
             $widgetType = strtolower((string)$element->getAttribute('type'));
         }
@@ -519,7 +534,7 @@ class WebdriverClassicDriver extends CoreDriver
         bool $multiple = false
     ): void {
         $element = $this->findElement($xpath);
-        $tagName = strtolower($element->getTagName() ?? '');
+        $tagName = $element->getTagName();
 
         if ($tagName === 'input' && strtolower((string)$element->getAttribute('type')) === 'radio') {
             $this->selectRadioValue($element, $value);
@@ -747,7 +762,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Sets the timeouts to apply to the webdriver session
      *
-     * @param array $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
+     * @param TTimeouts $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
      * @throws DriverException
      * @api
      */
@@ -804,6 +819,8 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * Detect and assign appropriate browser capabilities
+     *
+     * @param TCapabilities $desiredCapabilities
      *
      * @see https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
      */
