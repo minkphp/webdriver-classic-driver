@@ -762,7 +762,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     // </editor-fold>
 
-    // <editor-fold desc="Private Utilities">
+    // <editor-fold desc="Extension Points">
 
     /**
      * @throws DriverException
