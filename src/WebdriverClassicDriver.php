@@ -18,14 +18,18 @@ use Facebook\WebDriver\Exception\ScriptTimeoutException;
 use Facebook\WebDriver\Exception\TimeoutException;
 use Facebook\WebDriver\Exception\UnsupportedOperationException;
 use Facebook\WebDriver\Exception\WebDriverException;
+use Facebook\WebDriver\Interactions\WebDriverActions;
+use Facebook\WebDriver\Internal\WebDriverLocatable;
+use Facebook\WebDriver\JavaScriptExecutor;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\Remote\WebDriverBrowserType;
 use Facebook\WebDriver\Remote\WebDriverCapabilityType;
+use Facebook\WebDriver\WebDriver;
 use Facebook\WebDriver\WebDriverBy;
 use Facebook\WebDriver\WebDriverDimension;
 use Facebook\WebDriver\WebDriverElement;
+use Facebook\WebDriver\WebDriverHasInputDevices;
 use Facebook\WebDriver\WebDriverPlatform;
 use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
@@ -35,7 +39,9 @@ use JetBrains\PhpStorm\Language;
  * @phpstan-type TTimeouts array{script?: null|numeric, implicit?: null|numeric, page?: null|numeric, "page load"?: null|numeric, pageLoad?: null|numeric}
  * @phpstan-type TCapabilities array<string, mixed>
  * @phpstan-type TElementValue array<array-key, mixed>|bool|mixed|string|null
- * @phpstan-type TWebDriverInstantiator callable(string $driverHost, DesiredCapabilities $capabilities): RemoteWebDriver
+ * @phpstan-type TWebDriver WebDriver&JavaScriptExecutor&WebDriverHasInputDevices
+ * @phpstan-type TWebDriverElement WebDriverElement&WebDriverLocatable
+ * @phpstan-type TWebDriverInstantiator callable(string $driverHost, DesiredCapabilities $capabilities): TWebDriver
  */
 class WebdriverClassicDriver extends CoreDriver
 {
@@ -77,7 +83,10 @@ class WebdriverClassicDriver extends CoreDriver
 
     private const W3C_WINDOW_HANDLE_PREFIX = 'w3cwh:';
 
-    private ?RemoteWebDriver $webDriver = null;
+    /**
+     * @var TWebDriver|null
+     */
+    private ?WebDriver $webDriver = null;
 
     private string $browserName;
 
@@ -210,7 +219,7 @@ class WebdriverClassicDriver extends CoreDriver
     public function switchToIFrame(?string $name = null): void
     {
         $frameQuery = $name;
-        if ($name && $this->getWebDriver()->isW3cCompliant()) {
+        if ($name && $this->isW3cCompliant()) {
             try {
                 $frameQuery = $this->getWebDriver()->findElement(WebDriverBy::id($name));
             } catch (NoSuchElementException $e) {
@@ -569,14 +578,18 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): void {
-        $this->doubleClickOnElement($this->findElement($xpath));
+        $element = $this->findElement($xpath);
+        $element->getLocationOnScreenOnceScrolledIntoView();
+        $this->actions()->doubleClick($element)->perform();
     }
 
     public function rightClick(
         #[Language('XPath')]
         string $xpath
     ): void {
-        $this->rightClickOnElement($this->findElement($xpath));
+        $element = $this->findElement($xpath);
+        $element->getLocationOnScreenOnceScrolledIntoView();
+        $this->actions()->contextClick($element)->perform();
     }
 
     public function attachFile(
@@ -601,7 +614,9 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): void {
-        $this->mouseOverElement($this->findElement($xpath));
+        $element = $this->findElement($xpath);
+        $element->getLocationOnScreenOnceScrolledIntoView();
+        $this->actions()->moveToElement($element)->perform();
     }
 
     public function focus(
@@ -656,7 +671,7 @@ class WebdriverClassicDriver extends CoreDriver
     ): void {
         $source = $this->findElement($sourceXpath);
         $destination = $this->findElement($destinationXpath);
-        $this->getWebDriver()->action()->dragAndDrop($source, $destination)->perform();
+        $this->actions()->dragAndDrop($source, $destination)->perform();
     }
 
     public function executeScript(
@@ -751,8 +766,8 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getWebDriverSessionId(): ?string
     {
-        return $this->isStarted()
-            ? $this->getWebDriver()->getSessionID()
+        return $this->isStarted() && method_exists($this->getWebDriver(), 'getSessionId')
+            ? $this->getAsString($this->getWebDriver()->getSessionID(), 'Session ID')
             : null;
     }
 
@@ -789,15 +804,16 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * @return TWebDriver
      * @throws DriverException
      */
-    protected function getWebDriver(): RemoteWebDriver
+    protected function getWebDriver(): WebDriver
     {
-        if ($this->webDriver) {
-            return $this->webDriver;
+        if (!$this->webDriver) {
+            throw new DriverException('Base driver has not been created');
         }
 
-        throw new DriverException('Base driver has not been created');
+        return $this->webDriver;
     }
 
     // </editor-fold>
@@ -889,6 +905,15 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * @throws DriverException
      */
+    private function actions(): WebDriverActions
+    {
+        // WebDriverActions are not reset after being performed - that's why we create a new instance each time.
+        return new WebDriverActions($this->getWebDriver());
+    }
+
+    /**
+     * @throws DriverException
+     */
     private function withSyn(): self
     {
         $hasSyn = $this->evaluateScript(
@@ -963,11 +988,12 @@ class WebdriverClassicDriver extends CoreDriver
      * $this->executeJsOnElement($element, 'return argument[0].childNodes.length');
      * ```
      *
+     * @param TWebDriverElement $element
      * @return mixed
      * @throws DriverException
      */
     private function executeJsOnElement(
-        WebDriverElement $element,
+        $element,
         #[Language('JavaScript')]
         string $script
     ) {
@@ -1040,37 +1066,14 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    private function clickOnElement(WebDriverElement $element): void
-    {
-        $element->getLocationOnScreenOnceScrolledIntoView();
-        $element->click();
-    }
-
     /**
+     * @param TWebDriverElement $element
      * @throws DriverException
      */
-    private function doubleClickOnElement(RemoteWebElement $element): void
+    private function clickOnElement($element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->getWebDriver()->getMouse()->doubleClick($element->getCoordinates());
-    }
-
-    /**
-     * @throws DriverException
-     */
-    private function rightClickOnElement(RemoteWebElement $element): void
-    {
-        $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->getWebDriver()->getMouse()->contextClick($element->getCoordinates());
-    }
-
-    /**
-     * @throws DriverException
-     */
-    private function mouseOverElement(RemoteWebElement $element): void
-    {
-        $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->getWebDriver()->getMouse()->mouseMove($element->getCoordinates());
+        $this->actions()->click($element)->perform();
     }
 
     /**
@@ -1100,24 +1103,28 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * @return TWebDriverElement
      * @throws DriverException
      */
     private function findElement(
         #[Language('XPath')]
         string $xpath
-    ): RemoteWebElement {
+    ) {
         try {
             $finder = WebDriverBy::xpath($xpath);
-            return $this->getWebDriver()->findElement($finder);
+            $element = $this->getWebDriver()->findElement($finder);
+            assert($element instanceof WebDriverLocatable);
+            return $element;
         } catch (\Throwable $e) {
             throw new DriverException("Failed to find element: {$e->getMessage()}", 0, $e);
         }
     }
 
     /**
+     * @param TWebDriverElement $element
      * @throws DriverException
      */
-    private function selectRadioValue(WebDriverElement $element, string $value): void
+    private function selectRadioValue($element, string $value): void
     {
         try {
             (new WebDriverRadios($element))->selectByValue($value);
@@ -1133,9 +1140,10 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * @param TWebDriverElement $element
      * @throws DriverException
      */
-    private function selectOptionOnElement(WebDriverElement $element, string $value, bool $multiple = false): void
+    private function selectOptionOnElement($element, string $value, bool $multiple = false): void
     {
         try {
             $select = new WebDriverSelect($element);
@@ -1163,9 +1171,10 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * Note: this implementation does not trigger a change event after deselecting the elements.
      *
+     * @param TWebDriverElement $element
      * @throws DriverException
      */
-    private function deselectAllOptions(WebDriverElement $element): void
+    private function deselectAllOptions($element): void
     {
         try {
             (new WebDriverSelect($element))->deselectAll();
@@ -1180,10 +1189,11 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * @param TWebDriverElement $element
      * @throws DriverException
      */
     private function ensureInputType(
-        WebDriverElement $element,
+        $element,
         #[Language('XPath')]
         string $xpath,
         string $type,
@@ -1223,10 +1233,11 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * @param TWebDriverElement $element
      * @param mixed $value
      * @throws DriverException
      */
-    private function setElementDomProperty(WebDriverElement $element, string $property, $value): void
+    private function setElementDomProperty($element, string $property, $value): void
     {
         $this->executeJsOnElement(
             $element,
@@ -1235,13 +1246,14 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
+     * @param TWebDriverElement $element
      * @return mixed
      * @throws DriverException
      */
-    private function getElementDomProperty(RemoteWebElement $element, string $property)
+    private function getElementDomProperty($element, string $property)
     {
         try {
-            return $this->getWebDriver()->isW3cCompliant()
+            return $this->isW3cCompliant()
                 ? $element->getDomProperty($property)
                 : $this->executeJsOnElement($element, "return arguments[0]['$property']");
         } catch (UnsupportedOperationException $e) {
@@ -1268,6 +1280,15 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         return (string)$value;
+    }
+
+    private function isW3cCompliant(): bool
+    {
+        if (!method_exists($this->getWebDriver(), 'isW3cCompliant')) {
+            throw new DriverException('Base driver must implement an `isW3cCompliant` method that returns a boolean.');
+        }
+
+        return (bool)$this->getWebDriver()->isW3cCompliant();
     }
 
     // </editor-fold>
