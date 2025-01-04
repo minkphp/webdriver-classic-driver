@@ -788,11 +788,6 @@ class WebdriverClassicDriver extends CoreDriver
         throw new DriverException('Base driver has not been created');
     }
 
-    protected function getDesiredCapabilities(): array
-    {
-        return $this->desiredCapabilities->toArray();
-    }
-
     // </editor-fold>
 
     // <editor-fold desc="Private Utilities">
