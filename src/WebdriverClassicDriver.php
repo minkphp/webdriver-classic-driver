@@ -1073,7 +1073,7 @@ class WebdriverClassicDriver extends CoreDriver
     private function clickOnElement($element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
-        $this->actions()->click($element)->perform();
+        $element->click();
     }
 
     /**
