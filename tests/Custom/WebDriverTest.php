@@ -3,14 +3,13 @@
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Exception\DriverException;
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\WebDriver;
-use Facebook\WebDriver\WebDriverOptions;
-use Facebook\WebDriver\WebDriverTimeouts;
+use Mink\WebdriverClassicDriver\Tests\WebDriverMockingTrait;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebDriverTest extends TestCase
 {
+    use WebDriverMockingTrait;
+
     public function testDriverMustBeStartedBeforeUse(): void
     {
         $this->expectException(DriverException::class);
@@ -51,11 +50,7 @@ class WebDriverTest extends TestCase
 
     public function testDriverCatchesUpstreamErrorsDuringStop(): void
     {
-        $mockWebDriver = $this->createMock(RemoteWebDriver::class);
-        $mockWebDriverOptions = $this->createMock(WebDriverOptions::class);
-        $mockWebDriverTimeouts = $this->createMock(WebDriverTimeouts::class);
-        $mockWebDriver->method('manage')->willReturn($mockWebDriverOptions);
-        $mockWebDriverOptions->method('timeouts')->willReturn($mockWebDriverTimeouts);
+        $mockWebDriver = $this->createMockWebDriver();
         $mockWebDriver->method('quit')->willThrowException(new \RuntimeException('An upstream error'));
         $driver = new WebdriverClassicDriver('fake browser', [], 'example.com', fn() => $mockWebDriver);
 

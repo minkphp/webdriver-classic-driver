@@ -2,13 +2,13 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
-use Facebook\WebDriver\Remote\RemoteWebDriver;
-use Facebook\WebDriver\WebDriverOptions;
-use Facebook\WebDriver\WebDriverTimeouts;
+use Mink\WebdriverClassicDriver\Tests\WebDriverMockingTrait;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class CapabilityTest extends \PHPUnit\Framework\TestCase
 {
+    use WebDriverMockingTrait;
+
     /**
      * @param array<string, mixed> $desiredCapabilities
      * @param array<string, mixed> $expectedCapabilities
@@ -17,11 +17,7 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
      */
     public function testThatCapabilitiesAreAsExpected(string $browserName, array $desiredCapabilities, array $expectedCapabilities): void
     {
-        $mockWebDriver = $this->createMock(RemoteWebDriver::class);
-        $mockWebDriverOptions = $this->createMock(WebDriverOptions::class);
-        $mockWebDriverTimeouts = $this->createMock(WebDriverTimeouts::class);
-        $mockWebDriver->method('manage')->willReturn($mockWebDriverOptions);
-        $mockWebDriverOptions->method('timeouts')->willReturn($mockWebDriverTimeouts);
+        $mockWebDriver = $this->createMockWebDriver();
 
         $actualCapabilities = null;
         $driver = new WebdriverClassicDriver(
