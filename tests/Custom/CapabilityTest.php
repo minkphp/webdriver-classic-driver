@@ -2,6 +2,9 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverOptions;
+use Facebook\WebDriver\WebDriverTimeouts;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class CapabilityTest extends \PHPUnit\Framework\TestCase
@@ -14,9 +17,26 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
      */
     public function testThatCapabilitiesAreAsExpected(string $browserName, array $desiredCapabilities, array $expectedCapabilities): void
     {
-        $driver = $this->createDriverExposingCapabilities($browserName, $desiredCapabilities);
+        $mockWebDriver = $this->createMock(RemoteWebDriver::class);
+        $mockWebDriverOptions = $this->createMock(WebDriverOptions::class);
+        $mockWebDriverTimeouts = $this->createMock(WebDriverTimeouts::class);
+        $mockWebDriver->method('manage')->willReturn($mockWebDriverOptions);
+        $mockWebDriverOptions->method('timeouts')->willReturn($mockWebDriverTimeouts);
 
-        $this->assertSame($expectedCapabilities, $driver->capabilities);
+        $actualCapabilities = null;
+        $driver = new WebdriverClassicDriver(
+            $browserName,
+            $desiredCapabilities,
+            'example.com',
+            function ($host, $capabilities) use (&$actualCapabilities, $mockWebDriver) {
+                $actualCapabilities = $capabilities->toArray();
+                return $mockWebDriver;
+            }
+        );
+
+        $driver->start();
+
+        $this->assertSame($expectedCapabilities, $actualCapabilities);
     }
 
     public static function capabilitiesDataProvider(): iterable
@@ -77,27 +97,5 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
                 'goog:chromeOptions' => ['args' => ['a', 'b', 'c']],
             ],
         ];
-    }
-
-    /**
-     * @param string $browserName
-     * @param array<string, mixed> $desiredCapabilities
-     * @return WebdriverClassicDriver&object{capabilities: array<string, mixed>}
-     */
-    private function createDriverExposingCapabilities(string $browserName, array $desiredCapabilities = []): WebdriverClassicDriver
-    {
-        return new class($browserName, $desiredCapabilities) extends WebdriverClassicDriver {
-            /**
-             * @var array<string, mixed>
-             */
-            public array $capabilities;
-
-            public function __construct(string $browserName, array $desiredCapabilities)
-            {
-                parent::__construct($browserName, $desiredCapabilities);
-
-                $this->capabilities = $this->getDesiredCapabilities();
-            }
-        };
     }
 }
