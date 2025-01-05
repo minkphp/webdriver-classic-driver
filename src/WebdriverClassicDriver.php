@@ -280,7 +280,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     public function getWindowName(): string
     {
-        $name = (string)$this->evaluateScript('window.name');
+        $name = $this->getAsString($this->evaluateScript('window.name'), 'Window name');
 
         if ($name === '') {
             $name = self::W3C_WINDOW_HANDLE_PREFIX . $this->getWebDriver()->getWindowHandle();
@@ -317,7 +317,7 @@ class WebdriverClassicDriver extends CoreDriver
         return trim(str_replace(
             ["\r\n", "\r", "\n", "\xc2\xa0"],
             ' ',
-            $this->getElementDomProperty($this->findElement($xpath), 'innerText')
+            $this->getAsString($this->getElementDomProperty($this->findElement($xpath), 'innerText'), 'The element\'s innerText')
         ));
     }
 
@@ -325,14 +325,14 @@ class WebdriverClassicDriver extends CoreDriver
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->getElementDomProperty($this->findElement($xpath), 'innerHTML');
+        return $this->getAsString($this->getElementDomProperty($this->findElement($xpath), 'innerHTML'), 'The element\'s innerHTML');
     }
 
     public function getOuterHtml(
         #[Language('XPath')]
         string $xpath
     ): string {
-        return $this->getElementDomProperty($this->findElement($xpath), 'outerHTML');
+        return $this->getAsString($this->getElementDomProperty($this->findElement($xpath), 'outerHTML'), 'The element\'s outerHTML');
     }
 
     public function getAttribute(
@@ -344,7 +344,8 @@ class WebdriverClassicDriver extends CoreDriver
         // so we cannot use webdriver api for this. See also: https://w3c.github.io/webdriver/#dfn-get-element-attribute
         $escapedName = $this->jsonEncode($name, 'get attribute', 'attribute name');
         $script = "return arguments[0].getAttribute($escapedName)";
-        return $this->executeJsOnXpath($xpath, $script);
+        $result = $this->executeJsOnXpath($xpath, $script);
+        return $result === null ? null : $this->getAsString($result, "The element's $name attribute");
     }
 
     /**
@@ -412,7 +413,7 @@ class WebdriverClassicDriver extends CoreDriver
                     if (is_array($value)) {
                         $this->deselectAllOptions($element);
                         foreach ($value as $option) {
-                            $this->selectOptionOnElement($element, $option, true);
+                            $this->selectOptionOnElement($element, $this->getAsString($option, 'Option value'), true);
                         }
                         return;
                     }
@@ -941,12 +942,13 @@ class WebdriverClassicDriver extends CoreDriver
      * Executes JS on a given element - pass in a js script string and argument[0] will
      * be replaced with a reference to the result of the $xpath query
      *
-     * @param string $xpath the xpath to search with
-     * @param string $script the script to execute
+     * Example:
+     * ```
+     * $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
+     * ```
      *
      * @return mixed
      * @throws DriverException
-     * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnXpath(
         #[Language('XPath')]
@@ -960,11 +962,13 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Executes JS on a given element - pass in a js script string and argument[0] will contain a reference to the element
      *
-     * @param RemoteWebElement $element the webdriver element
-     * @param string $script the script to execute
+     * Example:
+     * ```
+     * $this->executeJsOnElement($element, 'return argument[0].childNodes.length');
+     * ```
+     *
      * @return mixed
      * @throws DriverException
-     * @example $this->executeJsOnXpath($xpath, 'return argument[0].childNodes.length');
      */
     private function executeJsOnElement(
         RemoteWebElement $element,
@@ -1255,6 +1259,22 @@ class WebdriverClassicDriver extends CoreDriver
             );
             throw new DriverException($message, 0, $e);
         }
+    }
+
+    /**
+     * @param mixed $value
+     * @throws DriverException
+     */
+    private function getAsString($value, string $name): string
+    {
+        if (!is_scalar($value)) {
+            $actualType = gettype($value);
+            throw new DriverException(
+                "$name should be a string or at least a scalar value, but received `$actualType` instead"
+            );
+        }
+
+        return (string)$value;
     }
 
     // </editor-fold>
