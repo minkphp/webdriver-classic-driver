@@ -3,10 +3,13 @@
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
 use Behat\Mink\Exception\DriverException;
+use Mink\WebdriverClassicDriver\Tests\WebDriverMockingTrait;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebDriverTest extends TestCase
 {
+    use WebDriverMockingTrait;
+
     public function testDriverMustBeStartedBeforeUse(): void
     {
         $this->expectException(DriverException::class);
@@ -35,11 +38,9 @@ class WebDriverTest extends TestCase
 
     public function testDriverCatchesUpstreamErrorsDuringStart(): void
     {
-        $driver = $this->createPartialMock(WebdriverClassicDriver::class, ['createWebDriver', 'getWebDriver']);
-        $driver
-            ->expects($this->once())
-            ->method('createWebDriver')
-            ->willThrowException(new \RuntimeException('An upstream error'));
+        $driver = new WebdriverClassicDriver('fake browser', [], 'example.com', function () {
+            throw new \RuntimeException('An upstream error');
+        });
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Could not start driver: An upstream error');
@@ -49,15 +50,11 @@ class WebDriverTest extends TestCase
 
     public function testDriverCatchesUpstreamErrorsDuringStop(): void
     {
-        $driver = $this->createPartialMock(WebdriverClassicDriver::class, ['createWebDriver', 'isStarted', 'getWebDriver']);
-        $driver
-            ->expects($this->once())
-            ->method('isStarted')
-            ->willReturn(true);
-        $driver
-            ->expects($this->once())
-            ->method('getWebDriver')
-            ->willThrowException(new \RuntimeException('An upstream error'));
+        $mockWebDriver = $this->createMockWebDriver();
+        $mockWebDriver->method('quit')->willThrowException(new \RuntimeException('An upstream error'));
+        $driver = new WebdriverClassicDriver('fake browser', [], 'example.com', fn() => $mockWebDriver);
+
+        $driver->start();
 
         $this->expectException(DriverException::class);
         $this->expectExceptionMessage('Could not close connection: An upstream error');

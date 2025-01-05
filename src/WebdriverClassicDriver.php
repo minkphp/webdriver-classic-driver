@@ -31,6 +31,9 @@ use Facebook\WebDriver\WebDriverRadios;
 use Facebook\WebDriver\WebDriverSelect;
 use JetBrains\PhpStorm\Language;
 
+/**
+ * @phpstan-type TWebDriverInstantiator callable(string $driverHost, DesiredCapabilities $capabilities): RemoteWebDriver
+ */
 class WebdriverClassicDriver extends CoreDriver
 {
     public const DEFAULT_BROWSER = WebDriverBrowserType::CHROME;
@@ -81,19 +84,27 @@ class WebdriverClassicDriver extends CoreDriver
 
     private string $webDriverHost;
 
+    /**
+     * @var TWebDriverInstantiator
+     */
+    private $webDriverInstantiator;
+
     private ?string $initialWindowHandle = null;
 
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
+     * @param TWebDriverInstantiator|null $webDriverInstantiator
      */
     public function __construct(
         string $browserName = self::DEFAULT_BROWSER,
         array $desiredCapabilities = [],
-        string $webDriverHost = 'http://localhost:4444/wd/hub'
+        string $webDriverHost = 'http://localhost:4444/wd/hub',
+        ?callable $webDriverInstantiator = null
     ) {
         $this->browserName = $browserName;
         $this->desiredCapabilities = $this->initCapabilities($desiredCapabilities);
         $this->webDriverHost = $webDriverHost;
+        $this->webDriverInstantiator = $webDriverInstantiator ?? [self::class, 'instantiateWebDriver'];
     }
 
     // <editor-fold desc="Implementation">
@@ -751,7 +762,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     // </editor-fold>
 
-    // <editor-fold desc="Private Utilities">
+    // <editor-fold desc="Extension Points">
 
     /**
      * @throws DriverException
@@ -762,7 +773,7 @@ class WebdriverClassicDriver extends CoreDriver
             throw new DriverException('Base driver has already been created');
         }
 
-        $this->webDriver = RemoteWebDriver::create($this->webDriverHost, $this->getDesiredCapabilities());
+        $this->webDriver = ($this->webDriverInstantiator)($this->webDriverHost, $this->desiredCapabilities);
     }
 
     /**
@@ -777,9 +788,13 @@ class WebdriverClassicDriver extends CoreDriver
         throw new DriverException('Base driver has not been created');
     }
 
-    protected function getDesiredCapabilities(): array
+    // </editor-fold>
+
+    // <editor-fold desc="Private Utilities">
+
+    private static function instantiateWebDriver(string $driverHost, DesiredCapabilities $capabilities): RemoteWebDriver
     {
-        return $this->desiredCapabilities->toArray();
+        return RemoteWebDriver::create($driverHost, $capabilities);
     }
 
     private function getNormalisedBrowserName(): string

@@ -2,10 +2,13 @@
 
 namespace Mink\WebdriverClassicDriver\Tests\Custom;
 
+use Mink\WebdriverClassicDriver\Tests\WebDriverMockingTrait;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class CapabilityTest extends \PHPUnit\Framework\TestCase
 {
+    use WebDriverMockingTrait;
+
     /**
      * @param array<string, mixed> $desiredCapabilities
      * @param array<string, mixed> $expectedCapabilities
@@ -14,9 +17,22 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
      */
     public function testThatCapabilitiesAreAsExpected(string $browserName, array $desiredCapabilities, array $expectedCapabilities): void
     {
-        $driver = $this->createDriverExposingCapabilities($browserName, $desiredCapabilities);
+        $mockWebDriver = $this->createMockWebDriver();
 
-        $this->assertSame($expectedCapabilities, $driver->capabilities);
+        $actualCapabilities = null;
+        $driver = new WebdriverClassicDriver(
+            $browserName,
+            $desiredCapabilities,
+            'example.com',
+            function ($host, $capabilities) use (&$actualCapabilities, $mockWebDriver) {
+                $actualCapabilities = $capabilities->toArray();
+                return $mockWebDriver;
+            }
+        );
+
+        $driver->start();
+
+        $this->assertSame($expectedCapabilities, $actualCapabilities);
     }
 
     public static function capabilitiesDataProvider(): iterable
@@ -77,27 +93,5 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
                 'goog:chromeOptions' => ['args' => ['a', 'b', 'c']],
             ],
         ];
-    }
-
-    /**
-     * @param string $browserName
-     * @param array<string, mixed> $desiredCapabilities
-     * @return WebdriverClassicDriver&object{capabilities: array<string, mixed>}
-     */
-    private function createDriverExposingCapabilities(string $browserName, array $desiredCapabilities = []): WebdriverClassicDriver
-    {
-        return new class($browserName, $desiredCapabilities) extends WebdriverClassicDriver {
-            /**
-             * @var array<string, mixed>
-             */
-            public array $capabilities;
-
-            public function __construct(string $browserName, array $desiredCapabilities)
-            {
-                parent::__construct($browserName, $desiredCapabilities);
-
-                $this->capabilities = $this->getDesiredCapabilities();
-            }
-        };
     }
 }
