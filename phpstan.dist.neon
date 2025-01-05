@@ -3,7 +3,7 @@ includes:
 	- vendor/phpstan/phpstan-phpunit/rules.neon
 
 parameters:
-	level: 9
+	level: 10
 	paths:
 		- src
 		- tests
@@ -25,4 +25,14 @@ parameters:
 			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:setScriptTimeout\(\) expects int, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Method Mink\\WebdriverClassicDriver\\WebdriverClassicDriver\:\:getWindowHandleFromName\(\) should return string but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			message: '#^Parameter \#1 \$handle of method Facebook\\WebDriver\\Remote\\RemoteTargetLocator\:\:window\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 3
 			path: src/WebdriverClassicDriver.php
