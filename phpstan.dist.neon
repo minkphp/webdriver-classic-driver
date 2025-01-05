@@ -1,11 +1,28 @@
-parameters:
-    level: 8
-    paths:
-        - src
-        - tests
-    checkMissingIterableValueType: false
-    treatPhpDocTypesAsCertain: false
-
 includes:
-    - vendor/phpstan/phpstan-phpunit/extension.neon
-    - vendor/phpstan/phpstan-phpunit/rules.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
+	- vendor/phpstan/phpstan-phpunit/rules.neon
+
+parameters:
+	level: 8
+	paths:
+		- src
+		- tests
+	ignoreErrors:
+		-
+			# See: https://github.com/php-webdriver/php-webdriver/pull/1120
+			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:implicitlyWait\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			# See: https://github.com/php-webdriver/php-webdriver/pull/1120
+			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:pageLoadTimeout\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
+		-
+			# See: https://github.com/php-webdriver/php-webdriver/pull/1120
+			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:setScriptTimeout\(\) expects int, float\|int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/WebdriverClassicDriver.php
