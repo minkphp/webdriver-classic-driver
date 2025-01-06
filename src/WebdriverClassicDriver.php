@@ -84,23 +84,25 @@ class WebdriverClassicDriver extends CoreDriver
     private DesiredCapabilities $desiredCapabilities;
 
     /**
-     * @var TTimeouts
+     * @phpstan-var TTimeouts
      */
     private array $timeouts = [];
 
     private string $webDriverHost;
 
     /**
-     * @var TWebDriverInstantiator
+     * @phpstan-var TWebDriverInstantiator
      */
     private $webDriverInstantiator;
 
     private ?string $initialWindowHandle = null;
 
+    // <editor-fold desc="Implementation">
+
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
-     * @param TCapabilities $desiredCapabilities
-     * @param TWebDriverInstantiator|null $webDriverInstantiator
+     * @phpstan-param TCapabilities $desiredCapabilities
+     * @phpstan-param TWebDriverInstantiator|null $webDriverInstantiator
      */
     public function __construct(
         string $browserName = self::DEFAULT_BROWSER,
@@ -113,8 +115,6 @@ class WebdriverClassicDriver extends CoreDriver
         $this->webDriverHost = $webDriverHost;
         $this->webDriverInstantiator = $webDriverInstantiator ?? [self::class, 'instantiateWebDriver'];
     }
-
-    // <editor-fold desc="Implementation">
 
     public function start(): void
     {
@@ -350,7 +350,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @return TElementValue
+     * @phpstan-return TElementValue
      */
     public function getValue(
         #[Language('XPath')]
@@ -394,7 +394,7 @@ class WebdriverClassicDriver extends CoreDriver
 
     /**
      * {@inheritdoc}
-     * @param TElementValue $value
+     * @phpstan-param TElementValue $value
      */
     public function setValue(
         #[Language('XPath')]
@@ -759,7 +759,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Sets the timeouts to apply to the webdriver session
      *
-     * @param TTimeouts $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
+     * @phpstan-param TTimeouts $timeouts The session timeout settings: Array of {script, implicit, page} => time in milliseconds
      * @throws DriverException
      * @api
      */
@@ -817,7 +817,7 @@ class WebdriverClassicDriver extends CoreDriver
     /**
      * Detect and assign appropriate browser capabilities
      *
-     * @param TCapabilities $desiredCapabilities
+     * @phpstan-param TCapabilities $desiredCapabilities
      *
      * @see https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities
      */

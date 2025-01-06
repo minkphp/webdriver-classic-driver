@@ -13,8 +13,8 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
     use WebDriverMockingTrait;
 
     /**
-     * @param TCapabilities $desiredCapabilities
-     * @param TCapabilities $expectedCapabilities
+     * @phpstan-param TCapabilities $desiredCapabilities
+     * @phpstan-param TCapabilities $expectedCapabilities
      *
      * @dataProvider capabilitiesDataProvider
      */
@@ -39,7 +39,7 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @return iterable<string, array{browserName: string, desiredCapabilities: TCapabilities, expectedCapabilities: TCapabilities}>
+     * @phpstan-return iterable<string, array{browserName: string, desiredCapabilities: TCapabilities, expectedCapabilities: TCapabilities}>
      */
     public static function capabilitiesDataProvider(): iterable
     {
