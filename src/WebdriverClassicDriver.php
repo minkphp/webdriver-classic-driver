@@ -97,8 +97,6 @@ class WebdriverClassicDriver extends CoreDriver
 
     private ?string $initialWindowHandle = null;
 
-    // <editor-fold desc="Implementation">
-
     /**
      * @param string $browserName One of 'edge', 'firefox', 'chrome' or any one of {@see WebDriverBrowserType} constants.
      * @phpstan-param TCapabilities $desiredCapabilities
@@ -115,6 +113,8 @@ class WebdriverClassicDriver extends CoreDriver
         $this->webDriverHost = $webDriverHost;
         $this->webDriverInstantiator = $webDriverInstantiator ?? [self::class, 'instantiateWebDriver'];
     }
+
+    // <editor-fold desc="Implementation">
 
     public function start(): void
     {
