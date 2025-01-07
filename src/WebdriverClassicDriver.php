@@ -84,7 +84,7 @@ class WebdriverClassicDriver extends CoreDriver
     private const W3C_WINDOW_HANDLE_PREFIX = 'w3cwh:';
 
     /**
-     * @var TWebDriver|null
+     * @phpstan-var TWebDriver|null
      */
     private ?WebDriver $webDriver = null;
 
@@ -766,7 +766,7 @@ class WebdriverClassicDriver extends CoreDriver
      */
     public function getWebDriverSessionId(): ?string
     {
-        return $this->isStarted() && method_exists($this->getWebDriver(), 'getSessionId')
+        return $this->isStarted() && method_exists($this->getWebDriver(), 'getSessionID')
             ? $this->getAsString($this->getWebDriver()->getSessionID(), 'Session ID')
             : null;
     }
@@ -804,7 +804,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @return TWebDriver
+     * @phpstan-return TWebDriver
      * @throws DriverException
      */
     protected function getWebDriver(): WebDriver
@@ -988,7 +988,7 @@ class WebdriverClassicDriver extends CoreDriver
      * $this->executeJsOnElement($element, 'return argument[0].childNodes.length');
      * ```
      *
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @return mixed
      * @throws DriverException
      */
@@ -1067,7 +1067,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @throws DriverException
      */
     private function clickOnElement($element): void
@@ -1103,7 +1103,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @return TWebDriverElement
+     * @phpstan-return TWebDriverElement
      * @throws DriverException
      */
     private function findElement(
@@ -1121,7 +1121,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @throws DriverException
      */
     private function selectRadioValue($element, string $value): void
@@ -1140,7 +1140,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @throws DriverException
      */
     private function selectOptionOnElement($element, string $value, bool $multiple = false): void
@@ -1171,7 +1171,7 @@ class WebdriverClassicDriver extends CoreDriver
      *
      * Note: this implementation does not trigger a change event after deselecting the elements.
      *
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @throws DriverException
      */
     private function deselectAllOptions($element): void
@@ -1189,7 +1189,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @throws DriverException
      */
     private function ensureInputType(
@@ -1233,7 +1233,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @param mixed $value
      * @throws DriverException
      */
@@ -1246,7 +1246,7 @@ class WebdriverClassicDriver extends CoreDriver
     }
 
     /**
-     * @param TWebDriverElement $element
+     * @phpstan-param TWebDriverElement $element
      * @return mixed
      * @throws DriverException
      */
