@@ -130,6 +130,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
+          flags: ${{ matrix.browser }}-${{ matrix.selenium }}
 
       - name: Upload test results to Codecov
         # See https://nektosact.com/usage/index.html#skipping-steps
