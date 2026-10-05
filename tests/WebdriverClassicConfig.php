@@ -30,7 +30,7 @@ class WebdriverClassicConfig extends AbstractConfig
 
     public function getBrowserName(): string
     {
-        return getenv('WEB_FIXTURES_BROWSER') ?: WebdriverClassicDriver::DEFAULT_BROWSER;
+        return $this->getServerVar('WEB_FIXTURES_BROWSER', WebdriverClassicDriver::DEFAULT_BROWSER);
     }
 
     public function mapRemoteFilePath($file): string
@@ -85,13 +85,20 @@ class WebdriverClassicConfig extends AbstractConfig
 
     private function isOldChrome(): bool
     {
-        return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
-            && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
+        return $this->getBrowserName() === 'chrome'
+            && version_compare($this->getServerVar('SELENIUM_VERSION'), '3', '<');
     }
 
     private function isOldFirefox(): bool
     {
-        return getenv('WEB_FIXTURES_BROWSER') === 'firefox'
-            && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
+        return $this->getBrowserName() === 'firefox'
+            && version_compare($this->getServerVar('SELENIUM_VERSION'), '3', '<');
+    }
+
+    private function getServerVar(string $name, string $default = ''): string
+    {
+        $value = $_SERVER[$name] ?? $default;
+
+        return is_string($value) ? $value : $default;
     }
 }
