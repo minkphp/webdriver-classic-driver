@@ -9,24 +9,6 @@ parameters:
 		- tests
 	ignoreErrors:
 		-
-			# See: https://github.com/php-webdriver/php-webdriver/pull/1120
-			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:implicitlyWait\(\) expects int, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/WebdriverClassicDriver.php
-		-
-			# See: https://github.com/php-webdriver/php-webdriver/pull/1120
-			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:pageLoadTimeout\(\) expects int, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/WebdriverClassicDriver.php
-		-
-			# See: https://github.com/php-webdriver/php-webdriver/pull/1120
-			message: '#^Parameter \#1 \$seconds of method Facebook\\WebDriver\\WebDriverTimeouts\:\:setScriptTimeout\(\) expects int, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/WebdriverClassicDriver.php
-		-
 			message: '#^Method Mink\\WebdriverClassicDriver\\WebdriverClassicDriver\:\:getWindowHandleFromName\(\) should return string but returns mixed\.$#'
 			identifier: return.type
 			count: 1
@@ -35,4 +17,10 @@ parameters:
 			message: '#^Parameter \#1 \$handle of method Facebook\\WebDriver\\Remote\\RemoteTargetLocator\:\:window\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 3
+			path: src/WebdriverClassicDriver.php
+		-
+			# TODO provide a more precise type for the keypress, keydown and keyup methods in the DriverInterface of Mink
+			rawMessage: 'Parameter #1 $codepoint of function chr expects int<0, 255>, int given.'
+			identifier: argument.type
+			count: 1
 			path: src/WebdriverClassicDriver.php
