@@ -9,7 +9,6 @@ use Behat\Mink\Tests\Driver\Basic\StatusCodeTest;
 use Behat\Mink\Tests\Driver\Js\EventsTest;
 use Behat\Mink\Tests\Driver\Js\JavascriptTest;
 use Behat\Mink\Tests\Driver\Js\WindowTest;
-use Mink\WebdriverClassicDriver\Tests\Custom\TimeoutTest;
 use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebdriverClassicConfig extends AbstractConfig
@@ -65,11 +64,6 @@ class WebdriverClassicConfig extends AbstractConfig
                 && $this->isOldChrome():
                 return 'Old Chrome does not allow triggering events.';
 
-            case [$testCase, $test] === [TimeoutTest::class, 'testDeprecatedShortPageLoadTimeoutThrowsException']
-                && ($this->isChromiumBased() || $this->isOldFirefox())
-                && $this->isXvfb():
-                return 'Setting page load timeout several times causes a freeze in this browser.';
-
             case [$testCase, $test] === [JavascriptTest::class, 'testDragDropOntoHiddenItself']
                 && $this->isOldFirefox():
                 return 'The Firefox browser compatible with Selenium Server 2.x does not fully implement drag-n-drop support.';
@@ -99,10 +93,5 @@ class WebdriverClassicConfig extends AbstractConfig
     {
         return getenv('WEB_FIXTURES_BROWSER') === 'firefox'
             && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
-    }
-
-    private function isChromiumBased(): bool
-    {
-        return in_array($this->getBrowserName(), ['chrome', 'chromium', 'edge']);
     }
 }

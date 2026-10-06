@@ -14,6 +14,8 @@ $minkTestServer = new Process([
     '-t',
     __DIR__ . '/../vendor/mink/driver-testsuite/web-fixtures'
 ]);
+// Unread output fills the pipe buffer and blocks the server.
+$minkTestServer->disableOutput();
 $minkTestServer->start();
 
 register_shutdown_function(
