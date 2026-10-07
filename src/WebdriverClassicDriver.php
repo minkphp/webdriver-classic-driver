@@ -1040,10 +1040,13 @@ class WebdriverClassicDriver extends CoreDriver
         }
     }
 
-    private function clickOnElement(WebDriverElement $element): void
+    /**
+     * @throws DriverException
+     */
+    private function clickOnElement(RemoteWebElement $element): void
     {
         $element->getLocationOnScreenOnceScrolledIntoView();
-        $element->click();
+        $this->getWebDriver()->getMouse()->click($element->getCoordinates());
     }
 
     /**
