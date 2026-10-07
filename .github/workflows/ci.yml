@@ -20,7 +20,7 @@ jobs:
     steps:
       - id: defaults
         run: |
-          echo 'php="8.3"' >> "$GITHUB_OUTPUT"
+          echo 'php="8.5"' >> "$GITHUB_OUTPUT"
           echo 'browser="chrome"' >> "$GITHUB_OUTPUT"
           echo 'selenium="4"' >> "$GITHUB_OUTPUT"
 
@@ -28,22 +28,22 @@ jobs:
     name: Check composer.json
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           coverage: none
-          php-version: '8.1'
+          php-version: '8.5'
       - run: composer validate --strict --no-check-lock
 
   static_analysis:
     name: Static analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           coverage: none
-          php-version: '8.2'
+          php-version: '8.5'
       - name: Install dependencies
         run: composer update --ansi --no-progress --prefer-dist --no-interaction
       - run: vendor/bin/phpstan analyze
@@ -81,6 +81,12 @@ jobs:
           - php: '8.3'
             browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
             selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.4'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
+          - php: '8.5'
+            browser: ${{ fromJSON(needs.defaults.outputs.browser) }}
+            selenium: ${{ fromJSON(needs.defaults.outputs.selenium) }}
           # Check less-common browsers
           - php: ${{ fromJSON(needs.defaults.outputs.php) }}
             browser: 'edge'
@@ -92,7 +98,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -103,7 +109,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer update --no-interaction --prefer-dist --ansi --no-progress
+          composer update --no-interaction --ansi --no-progress
 
       - name: Start Selenium
         run: |
