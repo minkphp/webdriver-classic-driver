@@ -53,6 +53,8 @@ class WebdriverClassicDriver extends CoreDriver
             'goog:chromeOptions' => [
                 // disable "Chrome is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
+                // make clicks wait for the navigation they trigger (https://issues.chromium.org/issues/402796660)
+                'args' => ['--disable-features=DeferRendererTasksAfterInput'],
             ],
         ],
 
@@ -60,6 +62,8 @@ class WebdriverClassicDriver extends CoreDriver
             'ms:edgeOptions' => [
                 // disable "Microsoft Edge is being controlled.." notification bar
                 'excludeSwitches' => ['enable-automation'],
+                // make clicks wait for the navigation they trigger (https://issues.chromium.org/issues/402796660)
+                'args' => ['--disable-features=DeferRendererTasksAfterInput'],
                 // disable menu shown when text is selected (which interferes with double-clicking)
                 'prefs' => [
                     'edge_quick_search.show_mini_menu' => false,
