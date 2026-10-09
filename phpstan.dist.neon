@@ -32,7 +32,13 @@ parameters:
 			count: 1
 			path: src/WebdriverClassicDriver.php
 		-
-			message: '#^Parameter \#1 \$handle of method Facebook\\WebDriver\\Remote\\RemoteTargetLocator\:\:window\(\) expects string, mixed given\.$#'
+			message: '#^Parameter \#1 \$handle of method Facebook\\WebDriver\\WebDriverTargetLocator\:\:window\(\) expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 3
+			path: src/WebdriverClassicDriver.php
+		-
+			# See https://github.com/php-webdriver/php-webdriver/blob/998e499b786805568deaf8cbf06f4044f05d91bf/lib/WebDriverElement.php#L43
+			message: '#^Call to an undefined method Facebook\\WebDriver\\Internal\\WebDriverLocatable\&Facebook\\WebDriver\\WebDriverElement\:\:getDomProperty\(\)\.$#'
+			identifier: method.notFound
+			count: 1
 			path: src/WebdriverClassicDriver.php
