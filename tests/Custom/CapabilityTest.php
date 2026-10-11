@@ -85,6 +85,25 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
             ],
         ];
 
+        yield 'edge-specific default capabilities are added' => [
+            'browserName' => 'edge',
+            'desiredCapabilities' => [],
+            'expectedCapabilities' => [
+                'browserName' => 'MicrosoftEdge',
+                'platform' => 'ANY',
+                'name' => 'Behat Test',
+                'deviceOrientation' => 'landscape',
+                'deviceType' => 'desktop',
+                'ms:edgeOptions' => [
+                    'excludeSwitches' => ['enable-automation'],
+                    'args' => ['--disable-features=DeferRendererTasksAfterInput'],
+                    'prefs' => [
+                        'edge_quick_search.show_mini_menu' => false,
+                    ],
+                ],
+            ],
+        ];
+
         yield 'browser-specific default capabilities can be customised' => [
             'browserName' => 'chrome',
             'desiredCapabilities' => [
