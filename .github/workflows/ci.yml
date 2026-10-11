@@ -49,7 +49,7 @@ jobs:
       - run: vendor/bin/phpstan analyze
 
   tests:
-    name: Tests
+    name: "Tests (${{ matrix.php }}, ${{ matrix.browser }}, ${{ matrix.selenium }})${{ matrix.php == fromJSON(needs.defaults.outputs.php) && ' with coverage' || '' }}"
     runs-on: ubuntu-latest
     needs: defaults
     env:
