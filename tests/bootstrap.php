@@ -2,10 +2,11 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use Mink\WebdriverClassicDriver\Tests\WebdriverClassicConfig;
 use Symfony\Component\Process\Process;
 
-$fixturesHost = $_SERVER['WEB_FIXTURES_HOST'] ?? '';
-$minkTestServerPort = parse_url(is_string($fixturesHost) ? $fixturesHost : '', PHP_URL_PORT) ?: '8002';
+$fixturesUrl = WebdriverClassicConfig::getInstance()->getWebFixturesUrl();
+$minkTestServerPort = parse_url($fixturesUrl, PHP_URL_PORT) ?: '8002';
 
 $minkTestServer = new Process([
     PHP_BINARY,

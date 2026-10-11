@@ -13,6 +13,13 @@ use Mink\WebdriverClassicDriver\WebdriverClassicDriver;
 
 class WebdriverClassicConfig extends AbstractConfig
 {
+    private int $seleniumMajorVersion;
+
+    public function __construct()
+    {
+        $this->seleniumMajorVersion = (int) explode('.', $this->getEnvVar('SELENIUM_VERSION') ?? '')[0];
+    }
+
     public static function getInstance(): self
     {
         return new self();
@@ -20,25 +27,23 @@ class WebdriverClassicConfig extends AbstractConfig
 
     public function createDriver(): WebdriverClassicDriver
     {
-        $seleniumHost = $_SERVER['DRIVER_URL'] ?? null;
-        if (!is_string($seleniumHost)) {
-            throw new \RuntimeException('Selenium host must be specified (as a string) in $_SERVER[DRIVER_URL].');
-        }
+        $seleniumHost = $this->getEnvVar('DRIVER_URL') ?? 'http://localhost:4444/wd/hub';
 
         return new WebdriverClassicDriver($this->getBrowserName(), [], $seleniumHost);
     }
 
     public function getBrowserName(): string
     {
-        return getenv('WEB_FIXTURES_BROWSER') ?: WebdriverClassicDriver::DEFAULT_BROWSER;
+        return $this->getEnvVar('WEB_FIXTURES_BROWSER') ?? WebdriverClassicDriver::DEFAULT_BROWSER;
     }
 
     public function mapRemoteFilePath($file): string
     {
-        if (!isset($_SERVER['TEST_MACHINE_BASE_PATH'])) {
-            $_SERVER['TEST_MACHINE_BASE_PATH'] = realpath(
-                    dirname(__DIR__) . '/vendor/mink/driver-testsuite/web-fixtures'
-                ) . DIRECTORY_SEPARATOR;
+        // Auto-detect "TEST_MACHINE_BASE_PATH" from the test fixtures folder location, so only "DRIVER_MACHINE_BASE_PATH"
+        // has to be set, when only this folder is shared with the Selenium machine (e.g. "/fixtures/" in "docker-compose.yml").
+        if (null === $this->getEnvVar('TEST_MACHINE_BASE_PATH')) {
+            $webFixturesPath = dirname(__DIR__) . '/vendor/mink/driver-testsuite/web-fixtures';
+            putenv('TEST_MACHINE_BASE_PATH=' . realpath($webFixturesPath) . DIRECTORY_SEPARATOR);
         }
 
         return parent::mapRemoteFilePath($file);
@@ -85,13 +90,11 @@ class WebdriverClassicConfig extends AbstractConfig
 
     private function isOldChrome(): bool
     {
-        return getenv('WEB_FIXTURES_BROWSER') === 'chrome'
-            && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
+        return $this->getBrowserName() === 'chrome' && $this->seleniumMajorVersion < 3;
     }
 
     private function isOldFirefox(): bool
     {
-        return getenv('WEB_FIXTURES_BROWSER') === 'firefox'
-            && version_compare(getenv('SELENIUM_VERSION') ?: '', '3', '<');
+        return $this->getBrowserName() === 'firefox' && $this->seleniumMajorVersion < 3;
     }
 }
