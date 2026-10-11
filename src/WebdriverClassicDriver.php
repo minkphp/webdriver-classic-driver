@@ -830,7 +830,7 @@ class WebdriverClassicDriver extends CoreDriver
         $capabilities = $this->createBrowserSpecificCapabilities();
 
         foreach (
-            array_merge(
+            $this->mergeCapabilities(
                 self::DEFAULT_CAPABILITIES['default'],
                 self::DEFAULT_CAPABILITIES[$this->getNormalisedBrowserName()] ?? [],
                 $desiredCapabilities,
@@ -840,6 +840,53 @@ class WebdriverClassicDriver extends CoreDriver
         }
 
         return $capabilities;
+    }
+
+    /**
+     * Merges maps recursively and appends lists, so that later capabilities extend earlier ones.
+     *
+     * @param array<array-key, mixed> ...$capabilitySets
+     * @return array<array-key, mixed>
+     *
+     * @throws \InvalidArgumentException When a list and a map are given for the same capability
+     */
+    private function mergeCapabilities(array ...$capabilitySets): array
+    {
+        $result = [];
+
+        foreach ($capabilitySets as $capabilities) {
+            if ($this->isList($result) && $this->isList($capabilities)) {
+                $result = array_merge($result, $capabilities);
+                continue;
+            }
+
+            foreach ($capabilities as $key => $value) {
+                if (is_array($value) && is_array($result[$key] ?? null)) {
+                    if (
+                        0 !== count($value) && 0 !== count($result[$key])
+                        && $this->isList($value) !== $this->isList($result[$key])
+                    ) {
+                        throw new \InvalidArgumentException(
+                            sprintf('Capability "%s" can\'t be merged: a list and a map were given.', $key)
+                        );
+                    }
+
+                    $value = $this->mergeCapabilities($result[$key], $value);
+                }
+
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<array-key, mixed> $array
+     */
+    private function isList(array $array): bool
+    {
+        return 0 === count($array) || array_keys($array) === range(0, count($array) - 1);
     }
 
     private function createBrowserSpecificCapabilities(): DesiredCapabilities

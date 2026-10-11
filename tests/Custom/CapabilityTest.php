@@ -38,6 +38,14 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
         $this->assertSame($expectedCapabilities, $actualCapabilities);
     }
 
+    public function testThatListAndMapCapabilitiesCannotBeMerged(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Capability "args" can\'t be merged: a list and a map were given.');
+
+        new WebdriverClassicDriver('chrome', ['goog:chromeOptions' => ['args' => ['headless' => true]]]);
+    }
+
     /**
      * @phpstan-return iterable<string, array{browserName: string, desiredCapabilities: TCapabilities, expectedCapabilities: TCapabilities}>
      */
@@ -97,7 +105,36 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
                 'name' => 'Custom Test',
                 'deviceOrientation' => 'landscape',
                 'deviceType' => 'desktop',
-                'goog:chromeOptions' => ['args' => ['a', 'b', 'c']],
+                'goog:chromeOptions' => [
+                    'excludeSwitches' => ['enable-automation'],
+                    'args' => ['--disable-features=DeferRendererTasksAfterInput', 'a', 'b', 'c'],
+                ],
+            ],
+        ];
+
+        yield 'browser-specific default capabilities are merged recursively' => [
+            'browserName' => 'edge',
+            'desiredCapabilities' => [
+                'ms:edgeOptions' => [
+                    'binary' => '/path/to/edge',
+                    'prefs' => ['custom.pref' => true],
+                ],
+            ],
+            'expectedCapabilities' => [
+                'browserName' => 'MicrosoftEdge',
+                'platform' => 'ANY',
+                'name' => 'Behat Test',
+                'deviceOrientation' => 'landscape',
+                'deviceType' => 'desktop',
+                'ms:edgeOptions' => [
+                    'excludeSwitches' => ['enable-automation'],
+                    'args' => ['--disable-features=DeferRendererTasksAfterInput'],
+                    'prefs' => [
+                        'edge_quick_search.show_mini_menu' => false,
+                        'custom.pref' => true,
+                    ],
+                    'binary' => '/path/to/edge',
+                ],
             ],
         ];
     }
