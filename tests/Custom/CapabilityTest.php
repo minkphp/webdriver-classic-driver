@@ -80,7 +80,10 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
                 'deviceType' => 'desktop',
                 'goog:chromeOptions' => [
                     'excludeSwitches' => ['enable-automation'],
-                    'args' => ['--disable-features=DeferRendererTasksAfterInput'],
+                    'args' => [
+                        '--disable-features=DeferRendererTasksAfterInput',
+                        '--disable-features=MacAppCodeSignClone',
+                    ],
                 ],
             ],
         ];
