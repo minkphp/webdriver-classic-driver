@@ -855,27 +855,44 @@ class WebdriverClassicDriver extends CoreDriver
         $result = [];
 
         foreach ($capabilitySets as $capabilities) {
-            if ($this->isList($result) && $this->isList($capabilities)) {
-                $result = array_merge($result, $capabilities);
-                continue;
-            }
+            $result = $this->mergeCapabilityPair($result, $capabilities, []);
+        }
 
-            foreach ($capabilities as $key => $value) {
-                if (is_array($value) && is_array($result[$key] ?? null)) {
-                    if (
-                        0 !== count($value) && 0 !== count($result[$key])
-                        && $this->isList($value) !== $this->isList($result[$key])
-                    ) {
-                        throw new \InvalidArgumentException(
-                            sprintf('Capability "%s" can\'t be merged: a list and a map were given.', $key)
-                        );
-                    }
+        return $result;
+    }
 
-                    $value = $this->mergeCapabilities($result[$key], $value);
+    /**
+     * @param array<array-key, mixed> $result
+     * @param array<array-key, mixed> $capabilities
+     * @param list<array-key> $path Keys leading to the merged arrays, for error messages
+     * @return array<array-key, mixed>
+     *
+     * @throws \InvalidArgumentException When a list and a map are given for the same capability
+     */
+    private function mergeCapabilityPair(array $result, array $capabilities, array $path): array
+    {
+        if ($this->isList($result) && $this->isList($capabilities)) {
+            return array_merge($result, $capabilities);
+        }
+
+        foreach ($capabilities as $key => $value) {
+            if (is_array($value) && is_array($result[$key] ?? null)) {
+                $keyPath = [...$path, $key];
+
+                if (
+                    0 !== count($value) && 0 !== count($result[$key])
+                    && $this->isList($value) !== $this->isList($result[$key])
+                ) {
+                    throw new \InvalidArgumentException(sprintf(
+                        'Capability "%s" can\'t be merged: a list and a map were given.',
+                        implode('" > "', $keyPath)
+                    ));
                 }
 
-                $result[$key] = $value;
+                $value = $this->mergeCapabilityPair($result[$key], $value, $keyPath);
             }
+
+            $result[$key] = $value;
         }
 
         return $result;

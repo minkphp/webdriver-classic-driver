@@ -41,7 +41,9 @@ class CapabilityTest extends \PHPUnit\Framework\TestCase
     public function testThatListAndMapCapabilitiesCannotBeMerged(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Capability "args" can\'t be merged: a list and a map were given.');
+        $this->expectExceptionMessage(
+            'Capability "goog:chromeOptions" > "args" can\'t be merged: a list and a map were given.'
+        );
 
         new WebdriverClassicDriver('chrome', ['goog:chromeOptions' => ['args' => ['headless' => true]]]);
     }
