@@ -25,7 +25,32 @@ class WebdriverClassicConfig extends AbstractConfig
             throw new \RuntimeException('Selenium host must be specified (as a string) in $_SERVER[DRIVER_URL].');
         }
 
-        return new WebdriverClassicDriver($this->getBrowserName(), [], $seleniumHost);
+        return new WebdriverClassicDriver($this->getBrowserName(), $this->getDesiredCapabilities(), $seleniumHost);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getDesiredCapabilities(): array
+    {
+        $error = 'The DRIVER_CAPABILITIES environment variable must contain a JSON object.';
+        $capabilities = json_decode(getenv('DRIVER_CAPABILITIES') ?: '{}', true, 512, JSON_THROW_ON_ERROR);
+
+        if (!is_array($capabilities)) {
+            throw new \RuntimeException($error);
+        }
+
+        $result = [];
+
+        foreach ($capabilities as $name => $value) {
+            if (!is_string($name)) {
+                throw new \RuntimeException($error);
+            }
+
+            $result[$name] = $value;
+        }
+
+        return $result;
     }
 
     public function getBrowserName(): string
