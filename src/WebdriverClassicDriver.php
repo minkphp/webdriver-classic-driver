@@ -19,6 +19,7 @@ use Facebook\WebDriver\Exception\TimeoutException;
 use Facebook\WebDriver\Exception\UnsupportedOperationException;
 use Facebook\WebDriver\Exception\WebDriverException;
 use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\Remote\LocalFileDetector;
 use Facebook\WebDriver\Remote\RemoteWebDriver;
 use Facebook\WebDriver\Remote\RemoteWebElement;
 use Facebook\WebDriver\Remote\WebDriverBrowserType;
@@ -476,7 +477,8 @@ class WebdriverClassicDriver extends CoreDriver
                     if (!is_string($value)) {
                         throw new DriverException("Value for $widgetType must be a string");
                     }
-                    $element->sendKeys($value);
+                    // Uploads a file that exists locally to the browser's machine; other paths are sent as they are.
+                    $element->setFileDetector(new LocalFileDetector())->sendKeys($value);
                     break;
 
                 case 'text':
